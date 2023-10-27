@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "mattcl-aoc2023-py"
+version = "0.1.0"
+description = "Advent of Code solutions for 2023"
+authors = ["mattcl"]
+license = "MIT"
+readme = "README.md"
+
+packages = [
+    {include = "aoc"}
+]
+
+[tool.poetry.scripts]
+mattcl-aoc = "aoc.cli:run"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+click = "^8.1.7"
+
+[tool.poetry.dev-dependencies]
+black = "^23.10.0"
+pytest = "^7.4.2"
+pytest-watcher = "^0.3.4"
+pytest-benchmark = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.pytest.ini_options]
+markers = [
+    "real: marks tests as running against the real input (deselect with '-m \"not real\"')",
+    "example: marks tests as running against the example input (deselect with '-m \"not example\"')",
+    "bench: marks tests as benchmarking (deselect with '-m \"not bench\"')"
+]

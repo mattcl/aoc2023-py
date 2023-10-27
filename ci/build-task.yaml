@@ -1,0 +1,18 @@
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    # the docker image to use
+    repository: mattcl/aoc-python
+    tag: 3.12
+
+inputs:
+  # this repository will be provided to the task in the registry-image as a
+  # directory named `repo`
+  - name: repo
+
+run:
+  # we execute the build script in the context of the this in the aoc-python
+  # container, which contains py 3.12 and poetry, among other things.
+  dir: repo
+  path: ci/scripts/build.sh
