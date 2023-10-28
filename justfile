@@ -20,4 +20,4 @@ watch:
 
 # run the solver for the given DAY and INPUT
 run DAY INPUT:
-    poetry run mattcl-aoc {{DAY}} {{INPUT}}
+    poetry run mattcl-aoc-py {{DAY}} {{INPUT}}

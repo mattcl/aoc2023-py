@@ -3,11 +3,11 @@
 This package distributes a library named
 `mattcl-aoc2023-py` that
 exposes a module named `aoc` and an executable named
-`mattcl-aoc` that, given a day and input, will
+`mattcl-aoc-py` that, given a day and input, will
 provide the solution.
 
 ```
-mattcl-aoc 3 my_input.txt
+mattcl-aoc-py 3 my_input.txt
 ```
 
 
@@ -58,13 +58,13 @@ directory.
 
 ```
 # with plain poetry
-poetry run mattcl-aoc DAY PATH_TO_INPUT
+poetry run mattcl-aoc-py DAY PATH_TO_INPUT
 
 # with poetry shell activated (or if you just installed the distribution)
-mattcl-aoc DAY PATH_TO_INPUT
+mattcl-aoc-py DAY PATH_TO_INPUT
 
 # example
-mattcl-aoc 2 inputs/day02.txt
+mattcl-aoc-py 2 inputs/day02.txt
 ```
 
 For information on how the CLI works see [aoc/cli.py](aoc/cli.py).

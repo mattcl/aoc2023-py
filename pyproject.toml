@@ -11,7 +11,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-mattcl-aoc = "aoc.cli:run"
+mattcl-aoc-py = "aoc.cli:run"
 
 [tool.poetry.dependencies]
 python = "^3.10"
