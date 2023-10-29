@@ -36,3 +36,6 @@ markers = [
     "example: marks tests as running against the example input (deselect with '-m \"not example\"')",
     "bench: marks tests as benchmarking (deselect with '-m \"not bench\"')"
 ]
+testpaths = [
+    "tests"
+]

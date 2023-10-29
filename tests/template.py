@@ -1,6 +1,6 @@
 import pytest
 
-from aoc.day01 import Solver
+from aoc.dayDAY import Solver
 from aoc.util import Solution
 
 
@@ -18,13 +18,13 @@ PART_TWO = 0
 #############################
 @pytest.fixture
 def example_input() -> str:
-    with open(f"inputs/day01_example.txt", "r") as f:
+    with open(f"inputs/dayDAY_example.txt", "r") as f:
         return f.read()
 
 
 @pytest.fixture
 def real_input() -> str:
-    with open(f"inputs/day01.txt", "r") as f:
+    with open(f"inputs/dayDAY.txt", "r") as f:
         return f.read()
 
 
@@ -69,7 +69,7 @@ def test_real_part_two(real_solver: Solver):
 # ======= benchmarks =======#
 #############################
 @pytest.mark.bench
-def test_day01(benchmark, real_input: str):
+def test_dayDAY(benchmark, real_input: str):
     expected = Solution(part_one=PART_ONE, part_two=PART_TWO)
     result = benchmark(Solver.solve, real_input)
 

@@ -1,3 +1,7 @@
+# make the modules/files/tests for a new day's problem
+new DAY:
+    scripts/new.sh {{DAY}}
+
 # run the unit tests (against example inputs)
 unit:
     poetry run pytest tests -m "not bench and not real"

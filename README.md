@@ -53,8 +53,22 @@ Tests have no naming restrictions, and are located under the top-level `tests`
 directory.
 
 
-### Running a solution for a given day
+### Starting work on a new day's problem
 
+You can either copy the templates and create the input placeholders by yourself,
+or you can run one of the following. By default, the template that generated
+this project also generated the day 1 placeholder module/tests/inputs.
+
+```
+# without just
+./scripts/new.sh DAY  # where DAY is 1-25
+
+# with just
+just new DAY
+```
+
+
+### Running a solution for a given day
 
 ```
 # with plain poetry
