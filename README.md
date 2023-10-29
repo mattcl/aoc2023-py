@@ -12,7 +12,7 @@ mattcl-aoc-py 3 my_input.txt
 
 
 This project is designed to be compatible with a [comparative benchmarking
-pipeline](https://github.com/mattcl/aoc-ci-bencher/blob/master/SPECIFICATION.md),
+pipeline](https://github.com/mattcl/aoc-benchmarks/blob/master/SPECIFICATION.md),
 which explains some of the layout and design decisions.
 
 
