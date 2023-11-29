@@ -9,4 +9,4 @@ poetry install
 
 # Without filtering any of the marks, this should run the example and real input
 # tests as well as running the benchmarks.
-poetry run pytest
+poetry run pytest tests --benchmark-group-by=name

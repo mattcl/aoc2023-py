@@ -18,13 +18,13 @@ PART_TWO = 0
 #############################
 @pytest.fixture
 def example_input() -> str:
-    with open(f"inputs/dayDAY_example.txt", "r") as f:
+    with open("inputs/dayDAY_example.txt", "r") as f:
         return f.read()
 
 
 @pytest.fixture
 def real_input() -> str:
-    with open(f"inputs/dayDAY.txt", "r") as f:
+    with open("inputs/dayDAY.txt", "r") as f:
         return f.read()
 
 

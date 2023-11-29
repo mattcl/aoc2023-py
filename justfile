@@ -12,11 +12,11 @@ test:
 
 # run all benchmarks
 bench:
-    poetry run pytest tests -m "bench"
+    poetry run pytest tests -m "bench" --benchmark-group-by=name
 
 # run all tests and benchmarks
 all:
-    poetry run pytest tests
+    poetry run pytest tests --benchmark-group-by=name
 
 # run all tests and benchmarks
 watch:
