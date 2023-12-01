@@ -2,7 +2,95 @@
 import aoc.util
 
 
-STARTING = set(['o', 't', 'f', 's', 'e', 'n'])
+def one(idx: int, line: str):
+    if line.startswith("one", idx):
+        return 1
+    else:
+        return None
+
+
+def two_three(idx: int, line: str):
+    if line.startswith("two", idx):
+        return 2
+    elif line.startswith("three", idx):
+        return 3
+    else:
+        return None
+
+
+def four_five(idx: int, line: str):
+    if line.startswith("four", idx):
+        return 4
+    elif line.startswith("five", idx):
+        return 5
+    else:
+        return None
+
+
+def six_seven(idx: int, line: str):
+    if line.startswith("six", idx):
+        return 6
+    elif line.startswith("seven", idx):
+        return 7
+    else:
+        return None
+
+
+def eight(idx: int, line: str):
+    if line.startswith("eight", idx):
+        return 8
+    else:
+        return None
+
+
+def nine(idx: int, line: str):
+    if line.startswith("nine", idx):
+        return 9
+    else:
+        return None
+
+
+STARTING = {
+    'o': one,
+    't': two_three,
+    'f': four_five,
+    's': six_seven,
+    'e': eight,
+    'n': nine,
+    # this is slightly faster than checking isdigit() then parsing to int()
+    '0': lambda _a, _b: 0,
+    '1': lambda _a, _b: 1,
+    '2': lambda _a, _b: 2,
+    '3': lambda _a, _b: 3,
+    '4': lambda _a, _b: 4,
+    '5': lambda _a, _b: 5,
+    '6': lambda _a, _b: 6,
+    '7': lambda _a, _b: 7,
+    '8': lambda _a, _b: 8,
+    '9': lambda _a, _b: 9,
+}
+
+# this is slightly faster than checking isdigit() then parsing to int()
+DIGIT_MAP = {
+    '0': 0,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 4,
+    '5': 5,
+    '6': 6,
+    '7': 7,
+    '8': 8,
+    '9': 9,
+}
+
+
+def match_line(idx: int, line: str):
+    first = line[idx]
+    if first in STARTING:
+        return STARTING[first](idx, line)
+    else:
+        return None
 
 
 # all solutions should subclass the `Solver` exposed by `aoc.util`
@@ -23,64 +111,31 @@ class Solver(aoc.util.Solver):
             end = 0
 
             for s_idx in range(0, line_len):
-                v = self.match_line(s_idx, line)
+                v = match_line(s_idx, line)
                 if v is not None:
                     self.p2_sum += v * 10
                     start = s_idx
                     break
 
             for s_idx in range(0, line_len):
-                v = self.match_line(line_len - 1 - s_idx, line)
+                v = match_line(line_len - 1 - s_idx, line)
                 if v is not None:
                     self.p2_sum += v
                     end = s_idx
                     break
 
             for s_idx in range(start, line_len):
-                if line[s_idx].isdigit():
-                    self.p1_sum += int(line[s_idx]) * 10
+                v = DIGIT_MAP.get(line[s_idx])
+                if v is not None:
+                    self.p1_sum += v * 10
                     break
 
             for s_idx in range(end, line_len):
                 adjust = line_len - 1 - s_idx
-                if line[adjust].isdigit():
-                    self.p1_sum += int(line[adjust])
+                v = DIGIT_MAP.get(line[adjust])
+                if v is not None:
+                    self.p1_sum += v
                     break
-
-    def match_simple_digit(self, ch: str):
-        if ch.isdigit():
-            return int(ch)
-        else:
-            return None
-
-    def match_line(self, idx: int, line: str):
-        first = line[idx]
-        if first.isdigit():
-            return int(first)
-        elif first in STARTING:
-            if first == "t":
-                if line.startswith("two", idx):
-                    return 2
-                elif line.startswith("three", idx):
-                    return 3
-            elif first == "s":
-                if line.startswith("six", idx):
-                    return 6
-                elif line.startswith("seven", idx):
-                    return 7
-            elif first == "f":
-                if line.startswith("four", idx):
-                    return 4
-                elif line.startswith("five", idx):
-                    return 5
-            elif line.startswith("one", idx):
-                return 1
-            elif line.startswith("eight", idx):
-                return 8
-            elif line.startswith("nine", idx):
-                return 9
-
-        return None
 
     def part_one(self) -> int:
         return self.p1_sum
