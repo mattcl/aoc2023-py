@@ -19,22 +19,31 @@ class Solver(aoc.util.Solver):
     def match_slice(self, slice: str):
         if slice[0].isdigit():
             return int(slice[0])
-        if slice.startswith("zero"):
+        elif slice[0] == "t":
+            if slice.startswith("two"):
+                return 2
+            elif slice.startswith("three"):
+                return 3
+            else:
+                return None
+        elif slice[0] == "s":
+            if slice.startswith("six"):
+                return 6
+            elif slice.startswith("seven"):
+                return 7
+            else:
+                return None
+        elif slice[0] == "f":
+            if slice.startswith("four"):
+                return 4
+            elif slice.startswith("five"):
+                return 5
+            else:
+                return None
+        elif slice.startswith("zero"):
             return 0
         elif slice.startswith("one"):
             return 1
-        elif slice.startswith("two"):
-            return 2
-        elif slice.startswith("three"):
-            return 3
-        elif slice.startswith("four"):
-            return 4
-        elif slice.startswith("five"):
-            return 5
-        elif slice.startswith("six"):
-            return 6
-        elif slice.startswith("seven"):
-            return 7
         elif slice.startswith("eight"):
             return 8
         elif slice.startswith("nine"):
