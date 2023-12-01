@@ -3,48 +3,48 @@ import aoc.util
 
 
 def one(idx: int, line: str):
-    if line.startswith("one", idx):
+    if line.startswith("ne", idx):
         return 1
     else:
         return None
 
 
 def two_three(idx: int, line: str):
-    if line.startswith("two", idx):
+    if line.startswith("wo", idx):
         return 2
-    elif line.startswith("three", idx):
+    elif line.startswith("hree", idx):
         return 3
     else:
         return None
 
 
 def four_five(idx: int, line: str):
-    if line.startswith("four", idx):
+    if line.startswith("our", idx):
         return 4
-    elif line.startswith("five", idx):
+    elif line.startswith("ive", idx):
         return 5
     else:
         return None
 
 
 def six_seven(idx: int, line: str):
-    if line.startswith("six", idx):
+    if line.startswith("ix", idx):
         return 6
-    elif line.startswith("seven", idx):
+    elif line.startswith("even", idx):
         return 7
     else:
         return None
 
 
 def eight(idx: int, line: str):
-    if line.startswith("eight", idx):
+    if line.startswith("ight", idx):
         return 8
     else:
         return None
 
 
 def nine(idx: int, line: str):
-    if line.startswith("nine", idx):
+    if line.startswith("ine", idx):
         return 9
     else:
         return None
@@ -88,7 +88,7 @@ DIGIT_MAP = {
 def match_line(idx: int, line: str):
     first = line[idx]
     if first in STARTING:
-        return STARTING[first](idx, line)
+        return STARTING[first](idx + 1, line)
     else:
         return None
 
@@ -117,8 +117,8 @@ class Solver(aoc.util.Solver):
                     start = s_idx
                     break
 
-            for s_idx in range(0, line_len):
-                v = match_line(line_len - 1 - s_idx, line)
+            for s_idx in range(line_len - 1, -1, -1):
+                v = match_line(s_idx, line)
                 if v is not None:
                     self.p2_sum += v
                     end = s_idx
@@ -130,9 +130,8 @@ class Solver(aoc.util.Solver):
                     self.p1_sum += v * 10
                     break
 
-            for s_idx in range(end, line_len):
-                adjust = line_len - 1 - s_idx
-                v = DIGIT_MAP.get(line[adjust])
+            for s_idx in range(end, -1, -1):
+                v = DIGIT_MAP.get(line[s_idx])
                 if v is not None:
                     self.p1_sum += v
                     break
