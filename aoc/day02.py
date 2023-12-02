@@ -56,9 +56,9 @@ class Solver(aoc.util.Solver):
             parts = line.split(": ")
             id = int(parts[0].split(" ")[1])
 
-            minimum = CubeSet(0, 0, 0)
-            for part in parts[1].split("; "):
-                minimum.maximum(CubeSet.from_str(part))
+            # we can just parse all the sets as if they were one beause of the
+            # way we parse
+            minimum = CubeSet.from_str(parts[1].replace(";", ","))
 
             self.games.append(Game(id, minimum))
 
