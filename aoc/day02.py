@@ -12,11 +12,12 @@ class CubeSet:
         for part in parts:
             sub_parts = part.split(" ")
             v = int(sub_parts[0])
-            if sub_parts[1][0] == 'r':
+            color = sub_parts[1][0]
+            if color == 'r':
                 r = max(v, r)
-            elif sub_parts[1][0] == 'g':
+            elif color == 'g':
                 g = max(v, g)
-            elif sub_parts[1][0] == 'b':
+            elif color == 'b':
                 b = max(v, b)
 
         return cls(r, g, b)
@@ -50,8 +51,8 @@ class Solver(aoc.util.Solver):
 
         for line in input.splitlines():
             # get the id
-            parts = line.split(": ")
-            id = int(parts[0].split(" ")[1])
+            parts = line.replace("Game ", "", 1).split(": ")
+            id = int(parts[0])
 
             # we can just parse all the sets as if they were one beause of the
             # way we parse
