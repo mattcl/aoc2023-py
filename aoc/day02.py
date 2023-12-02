@@ -10,9 +10,9 @@ class CubeSet:
         g = 0
         b = 0
         for part in parts:
-            sub_parts = part.split(" ")
+            sub_parts = part.split(" ", 1)
             v = int(sub_parts[0])
-            color = sub_parts[1][0]
+            color = sub_parts[1]
             if color == 'r':
                 r = max(v, r)
             elif color == 'g':
@@ -49,14 +49,16 @@ class Solver(aoc.util.Solver):
         self.id_sum = 0
         self.min_prod = 0
 
-        for line in input.splitlines():
-            # get the id
-            parts = line.replace("Game ", "", 1).split(": ")
+        # yeah, so because the replaces are in C, we can use this sequence
+        # to shrink the size of the input so that the splits have less work and
+        # require less space for allocations. Note the order of the replaces.
+        for line in input.replace('green', 'g').replace('blue', 'b').replace('red', 'r').replace(";", ",").replace("Game ", "").splitlines():
+            parts = line.split(": ", 1)
             id = int(parts[0])
 
             # we can just parse all the sets as if they were one beause of the
             # way we parse
-            minimum = CubeSet.from_str(parts[1].replace(";", ","))
+            minimum = CubeSet.from_str(parts[1])
 
             if minimum.subset(COMPARE):
                 self.id_sum += id
