@@ -1,5 +1,3 @@
-# You can copy/paste this template to start a new day
-
 """02: cube conundrum"""
 import aoc.util
 
@@ -40,17 +38,16 @@ class CubeSet:
         return self.r * self.g * self.b
 
 
-class Game:
-    def __init__(self, id: int, s: CubeSet):
-        self.id = id
-        self.minimum = s
+COMPARE = CubeSet(12, 13, 14)
 
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         # sets self.input to the provided input
         super(Solver, self).__init__(input)
-        self.games = []
+        self.id_sum = 0
+        self.min_prod = 0
+
         for line in input.splitlines():
             # get the id
             parts = line.split(": ")
@@ -60,20 +57,14 @@ class Solver(aoc.util.Solver):
             # way we parse
             minimum = CubeSet.from_str(parts[1].replace(";", ","))
 
-            self.games.append(Game(id, minimum))
+            if minimum.subset(COMPARE):
+                self.id_sum += id
+
+            self.min_prod += minimum.power()
 
     def part_one(self) -> int:
-        s = CubeSet(12, 13, 14)
-        sum = 0
-        for g in self.games:
-            if g.minimum.subset(s):
-                sum += g.id
-
-        return sum
+        # again, more efficient in this case to do both at the same time
+        return self.id_sum
 
     def part_two(self) -> int:
-        sum = 0
-        for g in self.games:
-            sum += g.minimum.power()
-
-        return sum
+        return self.min_prod
