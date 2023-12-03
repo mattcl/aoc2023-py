@@ -73,7 +73,8 @@ class Solver(aoc.util.Solver):
             row = candidate[0]
 
             digits = 1
-            number = int(self.lines[row][candidate[1]])
+            # nums = [self.lines[row][candidate[1]]]
+            nums = self.lines[row][candidate[1]]
 
             # walk west
             pos = candidate[1] - 1
@@ -86,8 +87,7 @@ class Solver(aoc.util.Solver):
                 ch = self.lines[row][pos]
                 if ch.isdigit():
                     pos -= 1
-                    number += int(ch) * (10 ** digits)
-                    digits += 1
+                    nums = ch + nums
                     seen.add(west)
                     continue
 
@@ -107,7 +107,7 @@ class Solver(aoc.util.Solver):
                 ch = self.lines[row][pos]
                 if ch.isdigit():
                     pos += 1
-                    number = number * 10 + int(ch)
+                    nums += ch
                     seen.add(east)
                     continue
 
@@ -115,6 +115,8 @@ class Solver(aoc.util.Solver):
 
             if continue_outer:
                 continue
+
+            number = int(nums)
 
             self.total_sum += number
             count += 1
