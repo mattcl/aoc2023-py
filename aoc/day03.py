@@ -3,11 +3,12 @@ import aoc.util
 
 
 NEIGHBORS = [
+    (0, -1),
+    (0, 1),
+    # order is important
     (-1, 0),
     (-1, 1),
     (-1, -1),
-    (0, -1),
-    (0, 1),
     (1, 0),
     (1, -1),
     (1, 1),
@@ -28,12 +29,12 @@ class Solver(aoc.util.Solver):
                 ch = self.lines[row][col]
 
                 if not (ch.isdigit() or ch == '.'):
-                    if ch not in self.symbol_map:
-                        self.symbol_map[ch] = []
-
                     locs = []
 
-                    for offset in NEIGHBORS:
+                    idx = 0
+                    while idx < 8:
+                        offset = NEIGHBORS[idx]
+
                         new_row = row + offset[0]
                         if new_row < 0 or new_row >= self.height:
                             continue
@@ -45,35 +46,47 @@ class Solver(aoc.util.Solver):
                         neighbor = self.lines[new_row][new_col]
                         if neighbor.isdigit():
                             locs.append((new_row, new_col))
+                            # we can skip evaluating some locations if we have
+                            # digits in certain places
+                            if idx == 2 or idx == 5:
+                                idx += 3
+                                continue
+
+                        idx += 1
 
                     if len(locs) > 0:
+                        if ch not in self.symbol_map:
+                            self.symbol_map[ch] = []
+
                         self.symbol_map[ch].append(locs)
 
     def part_one(self) -> int:
-        seen = set()
         total_sum = 0
+        seen = set()
 
         for svs in self.symbol_map.values():
             for vs in svs:
                 for candidate in vs:
-                    continue_outer = False
                     if candidate in seen:
                         continue
 
                     seen.add(candidate)
 
+                    continue_outer = False
+                    row = candidate[0]
+
                     digits = 1
-                    number = int(self.lines[candidate[0]][candidate[1]])
+                    number = int(self.lines[row][candidate[1]])
 
                     # walk west
                     pos = candidate[1] - 1
                     while pos >= 0:
-                        west = (candidate[0], pos)
+                        west = (row, pos)
                         if west in seen:
                             continue_outer = True
                             break
 
-                        ch = self.lines[candidate[0]][pos]
+                        ch = self.lines[row][pos]
                         if ch.isdigit():
                             pos -= 1
                             number += int(ch) * (10 ** digits)
@@ -89,12 +102,12 @@ class Solver(aoc.util.Solver):
                     # walk east
                     pos = candidate[1] + 1
                     while pos < self.width:
-                        east = (candidate[0], pos)
+                        east = (row, pos)
                         if east in seen:
                             continue_outer = True
                             break
 
-                        ch = self.lines[candidate[0]][pos]
+                        ch = self.lines[row][pos]
                         if ch.isdigit():
                             pos += 1
                             number = number * 10 + int(ch)
@@ -119,24 +132,26 @@ class Solver(aoc.util.Solver):
             sub_prod = 1
 
             for candidate in vs:
-                continue_outer = False
                 if candidate in seen:
                     continue
 
                 seen.add(candidate)
+                row = candidate[0]
+
+                continue_outer = False
 
                 digits = 1
-                number = int(self.lines[candidate[0]][candidate[1]])
+                number = int(self.lines[row][candidate[1]])
 
                 # walk west
                 pos = candidate[1] - 1
                 while pos >= 0:
-                    west = (candidate[0], pos)
+                    west = (row, pos)
                     if west in seen:
                         continue_outer = True
                         break
 
-                    ch = self.lines[candidate[0]][pos]
+                    ch = self.lines[row][pos]
                     if ch.isdigit():
                         pos -= 1
                         number += int(ch) * (10 ** digits)
@@ -152,12 +167,12 @@ class Solver(aoc.util.Solver):
                 # walk east
                 pos = candidate[1] + 1
                 while pos < self.width:
-                    east = (candidate[0], pos)
+                    east = (row, pos)
                     if east in seen:
                         continue_outer = True
                         break
 
-                    ch = self.lines[candidate[0]][pos]
+                    ch = self.lines[row][pos]
                     if ch.isdigit():
                         pos += 1
                         number = number * 10 + int(ch)
@@ -169,11 +184,12 @@ class Solver(aoc.util.Solver):
                 if continue_outer:
                     continue
 
-                sub_prod *= number
                 count += 1
 
                 if count > 2:
                     break
+
+                sub_prod *= number
 
             if count == 2:
                 total_sum += sub_prod
