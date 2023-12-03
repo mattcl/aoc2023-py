@@ -60,12 +60,15 @@ class Solver(aoc.util.Solver):
 
                         self.symbol_map[ch].append(locs)
 
-    def part_one(self) -> int:
-        total_sum = 0
+        self.total_sum = 0
+        self.total_prod = 0
         seen = set()
 
-        for svs in self.symbol_map.values():
+        for sym, svs in self.symbol_map.items():
             for vs in svs:
+                count = 0
+                sub_prod = 1
+
                 for candidate in vs:
                     if candidate in seen:
                         continue
@@ -119,79 +122,16 @@ class Solver(aoc.util.Solver):
                     if continue_outer:
                         continue
 
-                    total_sum += number
+                    self.total_sum += number
+                    count += 1
+                    sub_prod *= number
 
-        return total_sum
+                if sym == '*':
+                    if count == 2:
+                        self.total_prod += sub_prod
+
+    def part_one(self) -> int:
+        return self.total_sum
 
     def part_two(self) -> int:
-        seen = set()
-        total_sum = 0
-
-        for vs in self.symbol_map["*"]:
-            count = 0
-            sub_prod = 1
-
-            for candidate in vs:
-                if candidate in seen:
-                    continue
-
-                seen.add(candidate)
-                row = candidate[0]
-
-                continue_outer = False
-
-                digits = 1
-                number = int(self.lines[row][candidate[1]])
-
-                # walk west
-                pos = candidate[1] - 1
-                while pos >= 0:
-                    west = (row, pos)
-                    if west in seen:
-                        continue_outer = True
-                        break
-
-                    ch = self.lines[row][pos]
-                    if ch.isdigit():
-                        pos -= 1
-                        number += int(ch) * (10 ** digits)
-                        digits += 1
-                        seen.add(west)
-                        continue
-
-                    break
-
-                if continue_outer:
-                    continue
-
-                # walk east
-                pos = candidate[1] + 1
-                while pos < self.width:
-                    east = (row, pos)
-                    if east in seen:
-                        continue_outer = True
-                        break
-
-                    ch = self.lines[row][pos]
-                    if ch.isdigit():
-                        pos += 1
-                        number = number * 10 + int(ch)
-                        seen.add(east)
-                        continue
-
-                    break
-
-                if continue_outer:
-                    continue
-
-                count += 1
-
-                if count > 2:
-                    break
-
-                sub_prod *= number
-
-            if count == 2:
-                total_sum += sub_prod
-
-        return total_sum
+        return self.total_prod
