@@ -20,8 +20,10 @@ class Solver(aoc.util.Solver):
         self.lines = input.splitlines()
         self.height = len(self.lines)
         self.width = len(self.lines[0])
+        self.total_sum = 0
+        self.total_prod = 0
 
-        self.symbol_map = {}
+        seen = set()
 
         for row in range(0, self.height):
             for col in range(0, self.width):
@@ -55,80 +57,73 @@ class Solver(aoc.util.Solver):
                         idx += 1
 
                     if len(locs) > 0:
-                        if ch not in self.symbol_map:
-                            self.symbol_map[ch] = []
+                        self.process_candidates(locs, seen, ch == "*")
 
-                        self.symbol_map[ch].append(locs)
+    def process_candidates(self, candidates, seen, is_star):
+        count = 0
+        sub_prod = 1
 
-        self.total_sum = 0
-        self.total_prod = 0
-        seen = set()
+        for candidate in candidates:
+            if candidate in seen:
+                continue
 
-        for sym, svs in self.symbol_map.items():
-            for vs in svs:
-                count = 0
-                sub_prod = 1
+            seen.add(candidate)
 
-                for candidate in vs:
-                    if candidate in seen:
-                        continue
+            continue_outer = False
+            row = candidate[0]
 
-                    seen.add(candidate)
+            digits = 1
+            number = int(self.lines[row][candidate[1]])
 
-                    continue_outer = False
-                    row = candidate[0]
+            # walk west
+            pos = candidate[1] - 1
+            while pos >= 0:
+                west = (row, pos)
+                if west in seen:
+                    continue_outer = True
+                    break
 
-                    digits = 1
-                    number = int(self.lines[row][candidate[1]])
+                ch = self.lines[row][pos]
+                if ch.isdigit():
+                    pos -= 1
+                    number += int(ch) * (10 ** digits)
+                    digits += 1
+                    seen.add(west)
+                    continue
 
-                    # walk west
-                    pos = candidate[1] - 1
-                    while pos >= 0:
-                        west = (row, pos)
-                        if west in seen:
-                            continue_outer = True
-                            break
+                break
 
-                        ch = self.lines[row][pos]
-                        if ch.isdigit():
-                            pos -= 1
-                            number += int(ch) * (10 ** digits)
-                            digits += 1
-                            seen.add(west)
-                            continue
+            if continue_outer:
+                continue
 
-                        break
+            # walk east
+            pos = candidate[1] + 1
+            while pos < self.width:
+                east = (row, pos)
+                if east in seen:
+                    continue_outer = True
+                    break
 
-                    if continue_outer:
-                        continue
+                ch = self.lines[row][pos]
+                if ch.isdigit():
+                    pos += 1
+                    number = number * 10 + int(ch)
+                    seen.add(east)
+                    continue
 
-                    # walk east
-                    pos = candidate[1] + 1
-                    while pos < self.width:
-                        east = (row, pos)
-                        if east in seen:
-                            continue_outer = True
-                            break
+                break
 
-                        ch = self.lines[row][pos]
-                        if ch.isdigit():
-                            pos += 1
-                            number = number * 10 + int(ch)
-                            seen.add(east)
-                            continue
+            if continue_outer:
+                continue
 
-                        break
+            self.total_sum += number
+            count += 1
+            sub_prod *= number
 
-                    if continue_outer:
-                        continue
+        if is_star:
+            if count == 2:
+                self.total_prod += sub_prod
 
-                    self.total_sum += number
-                    count += 1
-                    sub_prod *= number
-
-                if sym == '*':
-                    if count == 2:
-                        self.total_prod += sub_prod
 
     def part_one(self) -> int:
         return self.total_sum
