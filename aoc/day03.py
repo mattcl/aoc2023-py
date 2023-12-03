@@ -120,9 +120,8 @@ class Solver(aoc.util.Solver):
             count += 1
             sub_prod *= number
 
-        if is_star:
-            if count == 2:
-                self.total_prod += sub_prod
+        if is_star and count == 2:
+            self.total_prod += sub_prod
 
 
     def part_one(self) -> int:
