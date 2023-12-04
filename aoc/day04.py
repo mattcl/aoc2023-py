@@ -4,7 +4,6 @@ import aoc.util
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
-        self.cards = []
         self.worth_sum = 0
 
         lines = input.splitlines()
