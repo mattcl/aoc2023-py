@@ -1,14 +1,20 @@
 """04: scratchcards"""
 import aoc.util
 
+
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         self.cards = []
+        self.worth_sum = 0
 
-        for line in input.splitlines():
+        lines = input.splitlines()
+        num_cards = len(lines)
+        copies = [1] * num_cards
+
+        for (l_idx, line) in enumerate(lines):
             winning = set()
             count = 0
-            parts = list(filter(None, line.split(" ")))
+            parts = line.split()
             id = int(parts[1].replace(":", ""))
 
             idx = 2
@@ -24,38 +30,16 @@ class Solver(aoc.util.Solver):
                     count += 1
                 idx += 1
 
-            self.cards.append(count)
+            if count > 0:
+                self.worth_sum += 2 ** (count - 1)
 
-    def recur_count(self, idx, memo) -> int:
-        if idx in memo:
-            return memo[idx]
+            for j in range(l_idx + 1, l_idx + count + 1):
+                copies[j] += copies[l_idx]
 
-        if idx >= len(self.cards):
-            return 0
-
-        if self.cards[idx] == 0:
-            return 0
-
-        sum = self.cards[idx]
-
-        for i in range(0, self.cards[idx]):
-            sum += self.recur_count(idx + i + 1, memo)
-
-        memo[idx] = sum
-
-        return sum
+        self.num_copies = sum(copies)
 
     def part_one(self) -> int:
-        sum = 0
-        for value in self.cards:
-            if value > 0:
-                sum += 2 ** (value - 1)
-
-        return sum
+        return self.worth_sum
 
     def part_two(self) -> int:
-        memo = {}
-        sum = 0
-        for idx in range(0, len(self.cards)):
-            sum += 1 + self.recur_count(idx, memo)
-        return sum
+        return self.num_copies
