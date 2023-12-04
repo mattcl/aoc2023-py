@@ -19,14 +19,13 @@ class Solver(aoc.util.Solver):
 
             idx = 2
             while parts[idx] != "|":
-                winning.add(int(parts[idx]))
+                winning.add(parts[idx])
                 idx += 1
 
             idx += 1
             num_parts = len(parts)
             while idx < num_parts:
-                v = int(parts[idx])
-                if v in winning:
+                if parts[idx] in winning:
                     count += 1
                 idx += 1
 
