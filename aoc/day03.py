@@ -39,10 +39,12 @@ class Solver(aoc.util.Solver):
 
                         new_row = row + offset[0]
                         if new_row < 0 or new_row >= self.height:
+                            idx += 1
                             continue
 
                         new_col = col + offset[1]
                         if new_col < 0 or new_col >= self.width:
+                            idx += 1
                             continue
 
                         neighbor = self.lines[new_row][new_col]

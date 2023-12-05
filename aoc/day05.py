@@ -107,7 +107,7 @@ class Solver(aoc.util.Solver):
                         next_ranges.append(
                             Range(
                                 r.start + entry.dest.start - entry.source.start,
-                                entry.source.end + entry.dest.start - r.start
+                                entry.source.end + entry.dest.start - entry.source.start
                             )
                         )
                         ranges.append(
