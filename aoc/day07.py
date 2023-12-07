@@ -2,23 +2,22 @@
 from operator import attrgetter
 import aoc.util
 
-JOKER = 16
-JOKER_MASK = ~JOKER
+JOKER = 'k'
 
 CARD_MAP = {
-    '2': 1,
-    '3': 2,
-    '4': 3,
-    '5': 4,
-    '6': 5,
-    '7': 6,
-    '8': 7,
-    '9': 8,
-    'T': 9,
+    '2': 'b',
+    '3': 'c',
+    '4': 'd',
+    '5': 'e',
+    '6': 'f',
+    '7': 'g',
+    '8': 'h',
+    '9': 'i',
+    'T': 'j',
     'J': JOKER,
-    'Q': 32,
-    'K': 33,
-    'A': 34,
+    'Q': 'l',
+    'K': 'm',
+    'A': 'n',
 }
 
 
@@ -90,7 +89,7 @@ class Hand:
     def __init__(self, cards, bid):
         self.cards = cards
         self.kind, self.joker_kind = hand_kinds(self.cards)
-        self.joker_cards = list(map(lambda x: x & JOKER_MASK, self.cards))
+        self.joker_cards = self.cards.replace(JOKER, 'a')
         self.bid = bid
 
 
@@ -100,7 +99,7 @@ class Solver(aoc.util.Solver):
         self.hands = []
         for line in input.splitlines():
             parts = line.split()
-            cards = list(map(lambda x: CARD_MAP[x], parts[0]))
+            cards = "".join(map(lambda x: CARD_MAP[x], parts[0]))
             bid = int(parts[1])
             self.hands.append(Hand(cards, bid))
 
