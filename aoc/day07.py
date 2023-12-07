@@ -33,10 +33,13 @@ FIVE_KIND = 6
 
 def hand_kinds(cards):
     counts = {}
+    maximum = 0
     for c in cards:
         if c not in counts:
             counts[c] = 0
         counts[c] += 1
+        if counts[c] > maximum:
+            maximum = counts[c]
 
     joker_count = counts.get(JOKER, 0)
     num = len(counts)
@@ -51,42 +54,36 @@ def hand_kinds(cards):
             return HIGH_CARD, HIGH_CARD
 
     if num == 2:
-        for value in counts.values():
-            if value == 4 or value == 1:
-                if joker_count > 0:
-                    return FOUR_KIND, FIVE_KIND
-                else:
-                    return FOUR_KIND, FOUR_KIND
-            elif value == 2 or value == 3:
-                if joker_count > 0:
-                    return FULL_HOUSE, FIVE_KIND
-                else:
-                    return FULL_HOUSE, FULL_HOUSE
-
-    num_pairs = 0
-    for value in counts.values():
-        if value == 3:
-            if joker_count == 1 or joker_count == 3:
-                return THREE_KIND, FOUR_KIND
+        if maximum == 4:
+            if joker_count > 0:
+                return FOUR_KIND, FIVE_KIND
             else:
-                return THREE_KIND, THREE_KIND
+                return FOUR_KIND, FOUR_KIND
+        else:
+            if joker_count > 0:
+                return FULL_HOUSE, FIVE_KIND
+            else:
+                return FULL_HOUSE, FULL_HOUSE
 
-        if value == 2:
-            num_pairs += 1
+    if maximum == 3:
+        if joker_count > 0:
+            return THREE_KIND, FOUR_KIND
+        else:
+            return THREE_KIND, THREE_KIND
 
-    if num_pairs == 2:
-        match joker_count:
-            case 1:
-                return TWO_PAIR, FULL_HOUSE
-            case 2:
-                return TWO_PAIR, FOUR_KIND
-            case _:
-                return TWO_PAIR, TWO_PAIR
+    if num == 4:
+        if joker_count > 0:
+            return ONE_PAIR, THREE_KIND
+        else:
+            return ONE_PAIR, ONE_PAIR
 
-    if joker_count > 0:
-        return ONE_PAIR, THREE_KIND
-    else:
-        return ONE_PAIR, ONE_PAIR
+    match joker_count:
+        case 1:
+            return TWO_PAIR, FULL_HOUSE
+        case 2:
+            return TWO_PAIR, FOUR_KIND
+        case _:
+            return TWO_PAIR, TWO_PAIR
 
 
 class Hand:
