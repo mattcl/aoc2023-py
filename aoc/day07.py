@@ -109,14 +109,8 @@ class Solver(aoc.util.Solver):
 
     def part_one(self) -> int:
         self.hands.sort(key=attrgetter('kind', 'cards'))
-        sum = 0
-        for (idx, v) in enumerate(self.hands):
-            sum += v.bid * (idx + 1)
-        return sum
+        return sum((idx + 1) * v.bid for (idx, v) in enumerate(self.hands))
 
     def part_two(self) -> int:
         self.hands.sort(key=attrgetter('joker_kind', 'joker_cards'))
-        sum = 0
-        for (idx, v) in enumerate(self.hands):
-            sum += v.bid * (idx + 1)
-        return sum
+        return sum((idx + 1) * v.bid for (idx, v) in enumerate(self.hands))
