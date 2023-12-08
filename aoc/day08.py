@@ -48,7 +48,7 @@ class Solver(aoc.util.Solver):
 
     def part_two(self) -> int:
         starting = (self.get_first_z(x) for x, y in self.mapping.items() if y.ends_with_a)
-        return math.lcm(reduce(lambda x, y: x * y // math.gcd(x, y), starting, 1))
+        return math.lcm(*starting)
 
     def get_first_z(self, start):
         count = 0
