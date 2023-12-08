@@ -18,7 +18,7 @@ class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         super(Solver, self).__init__(input)
         parts = input.split("\n\n")
-        self.instructions = parts[0]
+        self.instructions = list(map(lambda x: 0 if x == "L" else 1, parts[0]))
         self.mapping = {}
         for line in parts[1].splitlines():
             components = line.split(" = ")
@@ -35,7 +35,7 @@ class Solver(aoc.util.Solver):
             if cur == "ZZZ":
                 return count
 
-            if i == "L":
+            if i == 0:
                 cur = cur_node.left
             else:
                 cur = cur_node.right
@@ -59,7 +59,7 @@ class Solver(aoc.util.Solver):
             if cur_node.ends_with_z:
                 return count
 
-            if i == "L":
+            if i == 0:
                 cur = cur_node.left
             else:
                 cur = cur_node.right
