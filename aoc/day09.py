@@ -38,10 +38,10 @@ class Solver(aoc.util.Solver):
             row = len(sequence)
 
             for col, v in enumerate(sequence):
-                if (row - col + 1) % 2 == 0:
-                    self.right += PT[row][col] * v
-                else:
+                if (row - col) % 2 == 0:
                     self.right -= PT[row][col] * v
+                else:
+                    self.right += PT[row][col] * v
 
                 if col % 2 == 0:
                     self.left += PT[row][col + 1] * v
