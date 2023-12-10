@@ -281,7 +281,6 @@ class Solver(aoc.util.Solver):
         if len(next) > 0:
             self.flood(next, seen)
 
-
     def part_one(self) -> int:
         # TODO: actually return the answer
         return self.steps
