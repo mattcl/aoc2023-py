@@ -55,15 +55,27 @@ NEIGHBORS = [
 ]
 
 
-VERTICAL = '|'
-HORIZONAL = '-'
-NE90 = 'L'
-NW90 = 'J'
-SW90 = '7'
-SE90 = 'F'
-GROUND = '.'
-START = 'S'
-MAIN_LOOP = 'X'
+VERTICAL = 0
+HORIZONAL = 1
+NE90 = 2
+NW90 = 3
+SW90 = 4
+SE90 = 5
+GROUND = 6
+START = 7
+MAIN_LOOP = 8
+
+
+TRANSLATE = {
+    '|': VERTICAL,
+    '-': HORIZONAL,
+    'L': NE90,
+    'J': NW90,
+    '7': SW90,
+    'F': SE90,
+    '.': GROUND,
+    'S': START,
+}
 
 
 class State:
@@ -76,27 +88,27 @@ class State:
         out = []
         if self.facing == Directions.NORTH and self.tile == NW90:
             loc = self.location.add(NEIGHBORS[Directions.SOUTH.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.SOUTH and self.tile == SE90:
             loc = self.location.add(NEIGHBORS[Directions.NORTH.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.EAST and self.tile == NE90:
             loc = self.location.add(NEIGHBORS[Directions.WEST.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.WEST and self.tile == SW90:
             loc = self.location.add(NEIGHBORS[Directions.EAST.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
 
         loc = self.location.add(NEIGHBORS[self.facing.right().value])
-        if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+        if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
             if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                 out.append(loc)
 
@@ -106,27 +118,27 @@ class State:
         out = []
         if self.facing == Directions.NORTH and self.tile == NE90:
             loc = self.location.add(NEIGHBORS[Directions.SOUTH.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.SOUTH and self.tile == SW90:
             loc = self.location.add(NEIGHBORS[Directions.NORTH.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.EAST and self.tile == SE90:
             loc = self.location.add(NEIGHBORS[Directions.WEST.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
         elif self.facing == Directions.WEST and self.tile == NW90:
             loc = self.location.add(NEIGHBORS[Directions.EAST.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
                 if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                     out.append(loc)
 
         loc = self.location.add(NEIGHBORS[self.facing.left().value])
-        if loc.row > 0 and loc.col > 0 and loc.row <= height and loc.col <= width:
+        if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
             if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
                 out.append(loc)
 
@@ -142,7 +154,7 @@ class Actor:
         self.left_turns = 0
         self.history = [State(location, facing, tile)]
 
-    def advance(self, grid, width, height):
+    def advance(self, grid):
         next_location = self.location.add(NEIGHBORS[self.facing.value])
 
         assert (next_location.row >= 0 and next_location.col >= 0)
@@ -156,21 +168,21 @@ class Actor:
             elif tile == SE90:
                 self.facing = Directions.EAST
                 self.right_turns += 1
-        if self.facing == Directions.SOUTH:
+        elif self.facing == Directions.SOUTH:
             if tile == NE90:
                 self.facing = Directions.EAST
                 self.left_turns += 1
             elif tile == NW90:
                 self.facing = Directions.WEST
                 self.right_turns += 1
-        if self.facing == Directions.EAST:
+        elif self.facing == Directions.EAST:
             if tile == SW90:
                 self.facing = Directions.SOUTH
                 self.right_turns += 1
             elif tile == NW90:
                 self.facing = Directions.NORTH
                 self.left_turns += 1
-        if self.facing == Directions.WEST:
+        elif self.facing == Directions.WEST:
             if tile == SE90:
                 self.facing = Directions.SOUTH
                 self.left_turns += 1
@@ -192,7 +204,7 @@ class Solver(aoc.util.Solver):
                 col = line.find('S')
                 if col >= 0:
                     self.start = Location(row, col)
-            self.grid.append([*line])
+            self.grid.append([TRANSLATE[ch] for ch in line])
 
         self.height = len(self.grid)
         self.width = len(self.grid[0])
@@ -206,7 +218,7 @@ class Solver(aoc.util.Solver):
 
         while not actor.location == self.start:
             steps += 1
-            actor.advance(self.grid, self.width, self.height)
+            actor.advance(self.grid)
             self.grid[actor.location.row][actor.location.col] = MAIN_LOOP
 
         # if we have more right turns than left turns, the tiles in the loop are
@@ -232,7 +244,7 @@ class Solver(aoc.util.Solver):
         dirs = [Directions.NORTH, Directions.EAST, Directions.SOUTH, Directions.WEST]
         for dir in dirs:
             loc = self.start.add(NEIGHBORS[dir.value])
-            if loc.row > 0 and loc.col > 0 and loc.row <= self.height and loc.col <= self.width:
+            if loc.row >= 0 and loc.col >= 0 and loc.row < self.height and loc.col < self.width:
                 tile = self.grid[loc.row][loc.col]
                 if tile == VERTICAL and (dir == Directions.NORTH or dir == Directions.SOUTH):
                     return Actor(loc, dir, tile)
@@ -273,7 +285,7 @@ class Solver(aoc.util.Solver):
 
             for neighbor in NEIGHBORS:
                 loc = cur_loc.add(neighbor)
-                if loc.row > 0 and loc.col > 0 and loc.row <= self.height and loc.col <= self.width:
+                if loc.row >= 0 and loc.col >= 0 and loc.row < self.height and loc.col < self.width:
                     tile = self.grid[loc.row][loc.col]
                     if not (tile == MAIN_LOOP or loc in seen):
                         next.append(loc)
