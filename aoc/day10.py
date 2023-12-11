@@ -40,9 +40,6 @@ class Location:
     def add(self, other):
         return Location(self.row + other.row, self.col + other.col)
 
-    def __hash__(self):
-        return hash((self.row, self.col))
-
     def __eq__(self, other):
         return isinstance(other, Location) and self.row == other.row and self.col == other.col
 
@@ -63,7 +60,7 @@ SW90 = 4
 SE90 = 5
 GROUND = 6
 START = 7
-MAIN_LOOP = 8
+PROCESSED = 8
 
 
 TRANSLATE = {
@@ -84,63 +81,53 @@ class State:
         self.facing = facing
         self.tile = tile
 
-    def right_locs(self, seen, maze, width, height):
+    def right_locs(self, maze, width, height):
         out = []
-        if self.facing == Directions.NORTH and self.tile == NW90:
+        if self.tile == NW90 and self.facing == Directions.NORTH:
             loc = self.location.add(NEIGHBORS[Directions.SOUTH.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.SOUTH and self.tile == SE90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == SE90 and self.facing == Directions.SOUTH:
             loc = self.location.add(NEIGHBORS[Directions.NORTH.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.EAST and self.tile == NE90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == NE90 and self.facing == Directions.EAST:
             loc = self.location.add(NEIGHBORS[Directions.WEST.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.WEST and self.tile == SW90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == SW90 and self.facing == Directions.WEST:
             loc = self.location.add(NEIGHBORS[Directions.EAST.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
 
         loc = self.location.add(NEIGHBORS[self.facing.right().value])
-        if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-            if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                out.append(loc)
+        if maze[loc.row][loc.col] != PROCESSED:
+            out.append(loc)
 
         return out
 
-    def left_locs(self, seen, maze, width, height):
+    def left_locs(self, maze, width, height):
         out = []
-        if self.facing == Directions.NORTH and self.tile == NE90:
+        if self.tile == NE90 and self.facing == Directions.NORTH:
             loc = self.location.add(NEIGHBORS[Directions.SOUTH.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.SOUTH and self.tile == SW90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == SW90 and self.facing == Directions.SOUTH:
             loc = self.location.add(NEIGHBORS[Directions.NORTH.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.EAST and self.tile == SE90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == SE90 and self.facing == Directions.EAST:
             loc = self.location.add(NEIGHBORS[Directions.WEST.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
-        elif self.facing == Directions.WEST and self.tile == NW90:
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
+        elif self.tile == NW90 and self.facing == Directions.WEST:
             loc = self.location.add(NEIGHBORS[Directions.EAST.value])
-            if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-                if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                    out.append(loc)
+            if maze[loc.row][loc.col] != PROCESSED:
+                out.append(loc)
 
         loc = self.location.add(NEIGHBORS[self.facing.left().value])
-        if loc.row >= 0 and loc.col >= 0 and loc.row < height and loc.col < width:
-            if not (maze[loc.row][loc.col] == MAIN_LOOP or loc in seen):
-                out.append(loc)
+        if maze[loc.row][loc.col] != PROCESSED:
+            out.append(loc)
 
         return out
 
@@ -156,8 +143,6 @@ class Actor:
 
     def advance(self, grid):
         next_location = self.location.add(NEIGHBORS[self.facing.value])
-
-        assert (next_location.row >= 0 and next_location.col >= 0)
 
         tile = grid[next_location.row][next_location.col]
 
@@ -209,35 +194,34 @@ class Solver(aoc.util.Solver):
         self.height = len(self.grid)
         self.width = len(self.grid[0])
 
-        seen = set()
         steps = 1
 
         actor = self.determine_starting_actor()
-        self.grid[self.start.row][self.start.col] = MAIN_LOOP
-        self.grid[actor.location.row][actor.location.col] = MAIN_LOOP
+        self.grid[self.start.row][self.start.col] = PROCESSED
+        self.grid[actor.location.row][actor.location.col] = PROCESSED
 
         while not actor.location == self.start:
             steps += 1
             actor.advance(self.grid)
-            self.grid[actor.location.row][actor.location.col] = MAIN_LOOP
+            self.grid[actor.location.row][actor.location.col] = PROCESSED
 
+        self.num_inside = 0
         # if we have more right turns than left turns, the tiles in the loop are
         # to our right, otherwise, they're to our left
         if actor.right_turns > actor.left_turns:
             for state in actor.history:
-                locs = state.right_locs(seen, self.grid, self.width, self.height)
+                locs = state.right_locs(self.grid, self.width, self.height)
 
                 if len(locs) > 0:
-                    self.flood(locs, seen)
+                    self.flood(locs)
         else:
             for state in actor.history:
-                locs = state.left_locs(seen, self.grid, self.width, self.height)
+                locs = state.left_locs(self.grid, self.width, self.height)
 
                 if len(locs) > 0:
-                    self.flood(locs, seen)
+                    self.flood(locs)
 
         self.steps = steps // 2
-        self.num_inside = len(seen)
 
     def determine_starting_actor(self):
         # determine a position off of the starting location to move from
@@ -276,27 +260,24 @@ class Solver(aoc.util.Solver):
                 if tile == NE90 and dir == Directions.WEST:
                     return Actor(loc, Directions.NORTH, tile)
 
-    def flood(self, cur, seen):
+    def flood(self, cur):
         next = []
         for cur_loc in cur:
-            if cur_loc in seen:
+            if self.grid[cur_loc.row][cur_loc.col] == PROCESSED:
                 continue
-            seen.add(cur_loc)
+            self.grid[cur_loc.row][cur_loc.col] = PROCESSED
+            self.num_inside += 1
 
             for neighbor in NEIGHBORS:
                 loc = cur_loc.add(neighbor)
-                if loc.row >= 0 and loc.col >= 0 and loc.row < self.height and loc.col < self.width:
-                    tile = self.grid[loc.row][loc.col]
-                    if not (tile == MAIN_LOOP or loc in seen):
-                        next.append(loc)
+                if self.grid[loc.row][loc.col] != PROCESSED:
+                    next.append(loc)
 
         if len(next) > 0:
-            self.flood(next, seen)
+            self.flood(next)
 
     def part_one(self) -> int:
-        # TODO: actually return the answer
         return self.steps
 
     def part_two(self) -> int:
-        # TODO: actually return the answer
         return self.num_inside
