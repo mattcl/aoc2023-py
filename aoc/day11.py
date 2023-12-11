@@ -1,6 +1,6 @@
 """11: cosmic expansion"""
 from copy import copy
-from itertools import combinations
+from itertools import combinations, pairwise
 import aoc.util
 
 
@@ -44,16 +44,20 @@ class Solver(aoc.util.Solver):
                 num_empty_rows += 1
 
         empty_cols = list(sorted(empty_cols_raw))
+        empty_cols.append(width)
 
         cols_iter = list(reversed(list(enumerate(empty_cols))))
 
+        counts = [0] * width
+
+        for (idx1, col1), (idx2, col2) in pairwise(enumerate(empty_cols)):
+            for j in range(col1, col2):
+                counts[j] = idx1 + 1
+
         for g in galaxies:
-            for (col, v) in cols_iter:
-                if g.original.x > v:
-                    multiple = col + 1
-                    g.one.x += multiple
-                    g.one_million.x += 999999 * multiple
-                    break
+            multiple = counts[g.original.x]
+            g.one.x += multiple
+            g.one_million.x += 999999 * multiple
 
         self.p1 = 0
         self.p2 = 0
