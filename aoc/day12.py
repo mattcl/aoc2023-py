@@ -5,12 +5,17 @@ import aoc.util
 
 
 def arrangements(input, groups, seen):
-    if len(input) == 0:
-        if len(groups) == 0:
-            return 1
+    input_len = len(input)
+    group_len = len(groups)
+    if group_len == 0:
+        if input_len > 0 and '#' in input:
+            return 0
+        return 1
+
+    if input_len == 0:
         return 0
 
-    key = (len(input), len(groups))
+    key = (input_len, group_len)
 
     cached = seen.get(key)
     if cached is not None:
@@ -84,9 +89,15 @@ def arrangements(input, groups, seen):
                     return 0
 
         case '.':
-            res = arrangements(remainder, groups, seen)
-            seen[key] = res
-            return res
+            for i in range(0, input_len - 1):
+                if remainder[i] in "#?":
+                    res = arrangements(remainder[i:], groups, seen)
+                    seen[key] = res
+                    return res
+
+            if group_len == 0:
+                return 1
+            return 0
 
     assert False, "we should not get here"
 
@@ -98,24 +109,26 @@ def process(spring):
 
 def process_long(spring):
     seen = {}
-    return arrangements(spring[2], spring[3], seen)
+    return arrangements(spring[0], spring[1], seen)
 
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
-        self.springs = []
+        springs = []
+        long_springs = []
         for line in input.splitlines():
             parts = line.split()
             text = parts[0]
             nums = list(map(int, parts[1].split(",")))
             long_text = "?".join([text] * 5)
             long_nums = nums * 5
-            self.springs.append([text, nums, long_text, long_nums])
+            springs.append([text, nums])
+            long_springs.append([long_text, long_nums])
 
         # do this here so we can make sure we terminate the pool
         with Pool() as pool:
-            self.p1 = sum(pool.map(process, self.springs))
-            self.p2 = sum(pool.map(process_long, self.springs))
+            self.p1 = sum(pool.map(process, springs))
+            self.p2 = sum(pool.map(process_long, long_springs))
 
     def part_one(self) -> int:
         return self.p1
