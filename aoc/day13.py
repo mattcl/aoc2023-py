@@ -83,7 +83,6 @@ class Solver(aoc.util.Solver):
             lines = group.splitlines()
 
             height = len(lines)
-            print(height)
             width = len(lines[0])
 
             a, c = reflect_horizontal(lines, width, height)
