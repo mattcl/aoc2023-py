@@ -103,7 +103,7 @@ class Dish:
                 self.rounds_in_rows[new_value].append(col)
                 interval_insert_count += 1
 
-            self.rounds_in_cols[col] = []
+            self.rounds_in_cols[col].clear()
 
     def tilt_south(self):
         for col, intervals in enumerate(self.col_intervals):
@@ -119,7 +119,7 @@ class Dish:
                 self.rounds_in_rows[new_value].append(col)
                 interval_insert_count += 1
 
-            self.rounds_in_cols[col] = []
+            self.rounds_in_cols[col].clear()
 
     def tilt_west(self):
         for row, intervals in enumerate(self.row_intervals):
@@ -135,7 +135,7 @@ class Dish:
                 self.rounds_in_cols[new_value].append(row)
                 interval_insert_count += 1
 
-            self.rounds_in_rows[row] = []
+            self.rounds_in_rows[row].clear()
 
     def tilt_east(self) -> int:
         load = 0
@@ -154,7 +154,7 @@ class Dish:
                 self.rounds_in_cols[new_value].append(row)
                 interval_insert_count += 1
 
-            self.rounds_in_rows[row] = []
+            self.rounds_in_rows[row].clear()
 
         return load
 
