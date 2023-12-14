@@ -5,16 +5,8 @@ from itertools import pairwise
 import aoc.util
 
 
-class Interval:
-    def __init__(self, start, end):
-        self.start = min(start, end)
-        self.end = max(start, end)
-
-    def contains(self, value) -> bool:
-        return self.start <= value and value <= self.end
-
-    def __repr__(self):
-        return f"({self.start}, {self.end})"
+def contains(interval, value) -> bool:
+    return interval[0] <= value and value <= interval[1]
 
 
 class Dish:
@@ -47,9 +39,9 @@ class Dish:
             for start, end in pairwise(interval_markers):
                 if end - start < 2:
                     continue
-                intervals.append(Interval(start + 1, end - 1))
+                intervals.append((start + 1, end - 1))
 
-            self.row_intervals.append(intervals)
+            self.row_intervals.append((len(self.row_intervals), intervals))
 
         for col_markers in col_interval_markers:
             col_markers.append(height)
@@ -57,8 +49,8 @@ class Dish:
             for start, end in pairwise(col_markers):
                 if end - start < 2:
                     continue
-                intervals.append(Interval(start + 1, end - 1))
-            self.col_intervals.append(intervals)
+                intervals.append((start + 1, end - 1))
+            self.col_intervals.append((len(self.col_intervals), intervals))
 
     def total_load_p1(self) -> int:
         height = len(self.rounds_in_rows)
@@ -88,48 +80,48 @@ class Dish:
             loads.append(load)
 
     def tilt_north(self):
-        for col, intervals in enumerate(self.col_intervals):
+        for col, intervals in self.col_intervals:
             interval_idx = 0
             interval_insert_count = 0
 
             for value in self.rounds_in_cols[col]:
-                while not intervals[interval_idx].contains(value):
+                while not contains(intervals[interval_idx], value):
                     interval_idx += 1
                     interval_insert_count = 0
 
-                new_value = intervals[interval_idx].start + interval_insert_count
+                new_value = intervals[interval_idx][0] + interval_insert_count
                 self.rounds_in_rows[new_value].append(col)
                 interval_insert_count += 1
 
             self.rounds_in_cols[col].clear()
 
     def tilt_south(self):
-        for col, intervals in enumerate(self.col_intervals):
+        for col, intervals in self.col_intervals:
             interval_idx = 0
             interval_insert_count = 0
 
             for value in self.rounds_in_cols[col]:
-                while not intervals[interval_idx].contains(value):
+                while not contains(intervals[interval_idx], value):
                     interval_idx += 1
                     interval_insert_count = 0
 
-                new_value = intervals[interval_idx].end - interval_insert_count
+                new_value = intervals[interval_idx][1] - interval_insert_count
                 self.rounds_in_rows[new_value].append(col)
                 interval_insert_count += 1
 
             self.rounds_in_cols[col].clear()
 
     def tilt_west(self):
-        for row, intervals in enumerate(self.row_intervals):
+        for row, intervals in self.row_intervals:
             interval_idx = 0
             interval_insert_count = 0
 
             for value in self.rounds_in_rows[row]:
-                while not intervals[interval_idx].contains(value):
+                while not contains(intervals[interval_idx], value):
                     interval_idx += 1
                     interval_insert_count = 0
 
-                new_value = intervals[interval_idx].start + interval_insert_count
+                new_value = intervals[interval_idx][0] + interval_insert_count
                 self.rounds_in_cols[new_value].append(row)
                 interval_insert_count += 1
 
@@ -138,17 +130,16 @@ class Dish:
     def tilt_east(self) -> int:
         load = 0
         height = len(self.rounds_in_rows)
-        for row, intervals in enumerate(self.row_intervals):
+        for row, intervals in self.row_intervals:
             interval_idx = 0
             interval_insert_count = 0
-
+            load += (height - row) * len(self.rounds_in_rows[row])
             for value in self.rounds_in_rows[row]:
-                while not intervals[interval_idx].contains(value):
+                while not contains(intervals[interval_idx], value):
                     interval_idx += 1
                     interval_insert_count = 0
 
-                new_value = intervals[interval_idx].end - interval_insert_count
-                load += height - row
+                new_value = intervals[interval_idx][1] - interval_insert_count
                 self.rounds_in_cols[new_value].append(row)
                 interval_insert_count += 1
 
