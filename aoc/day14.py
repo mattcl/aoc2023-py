@@ -75,15 +75,13 @@ class Dish:
             load = self.tilt_east()
 
             if cycle_idx > 4:
-                key = loads[-4] << 96 | loads[-3] << 64 | loads[-2] << 32 | loads[-1]
+                key = load << 96 | loads[-1] << 64 | loads[-2] << 32 | loads[-3]
                 if key in cache:
                     e = cache[key]
                     if e != cycle_idx:
                         period = cycle_idx - e
-
-                        if count % period == cycle_idx % period:
-                            rem = (count - cycle_idx) % period
-                            return loads[e + rem - 1]
+                        rem = (count - cycle_idx) % period
+                        return loads[e + rem - 1]
 
                 cache[key] = cycle_idx
 
