@@ -16,7 +16,7 @@ def sum_bucket(b) -> int:
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         super(Solver, self).__init__(input)
-        buckets = list(map(lambda _: OrderedDict(), range(0, 256)))
+        buckets = [OrderedDict() for _ in range(0, 256)]
         self.p1 = 0
         for step in input.strip().split(','):
             self.p1 += compute_hash(step)
