@@ -32,6 +32,24 @@ LOCATION_OFFSET = {
 }
 
 
+def extract_char(bitmap, location, width):
+    target = 1 << (width - 1 - location.col)
+
+    if target & bitmap[location.row][0] != 0:
+        return '/'
+
+    if target & bitmap[location.row][1] != 0:
+        return '\\'
+
+    if target & bitmap[location.row][2] != 0:
+        return '|'
+
+    if target & bitmap[location.row][3] != 0:
+        return '-'
+
+    return None
+
+
 def next_location(location, dir, width, height):
     match dir:
         case 0:
@@ -50,9 +68,10 @@ def next_location(location, dir, width, height):
     return None
 
 
-def propagate(grid, start):
-    height = len(grid)
-    width = len(grid[0])
+def propagate(start):
+    global grid
+    global width
+    global height
     seen = set()
     energized = set()
     beams = deque([start])
@@ -66,7 +85,9 @@ def propagate(grid, start):
         seen.add(beam)
         energized.add(beam[0])
 
-        match grid[beam[0][0]][beam[0][1]]:
+        # tile = grid.get(beam[0])
+        tile = grid[beam[0][0]][beam[0][1]]
+        match tile:
             case '/':
                 next_dir = MIRROR_F[beam[1]]
                 next = next_location(beam[0], next_dir, width, height)
@@ -114,41 +135,38 @@ def propagate(grid, start):
     return len(energized)
 
 
-def propagate_all(grid):
-    height = len(grid)
-    width = len(grid[0])
+def pool_init(shared_grid):
+    global grid
+    global width
+    global height
+    grid = shared_grid
+    width = len(shared_grid[0])
+    height = len(shared_grid)
+
+
+def propagate_all(grid, width, height):
     bot = height - 1
     right = width - 1
-    starts = []
+    starts = deque()
     for i in range(0, height):
-        starts.append([
-            grid,
-            ((i, 0), EAST)
-        ])
-        starts.append([
-            grid,
-            ((i, right), WEST)
-        ])
+        starts.append(((i, 0), EAST))
+        starts.append(((i, right), WEST))
 
     for i in range(0, width):
-        starts.append([
-            grid,
-            ((0, i), SOUTH)
-        ])
-        starts.append([
-            grid,
-            ((bot, i), NORTH)
-        ])
+        starts.append(((0, i), SOUTH))
+        starts.append(((bot, i), NORTH))
 
-    with Pool() as pool:
-        return pool.starmap(propagate, starts)
+    with Pool(initializer=pool_init, initargs=[grid]) as pool:
+        return pool.map(propagate, starts)
 
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         grid = input.splitlines()
-        start = ((0, 0), EAST)
-        vals = propagate_all(grid)
+        height = len(grid)
+        width = len(grid[0])
+
+        vals = propagate_all(grid, width, height)
         self.p1 = vals[0]
         self.p2 = max(vals)
 
