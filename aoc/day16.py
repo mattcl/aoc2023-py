@@ -17,45 +17,6 @@ OPPOSITE = {
     WEST: EAST,
 }
 
-MIRROR_F = {
-    NORTH: EAST,
-    SOUTH: WEST,
-    EAST: NORTH,
-    WEST: SOUTH,
-}
-
-MIRROR_B = {
-    NORTH: WEST,
-    SOUTH: EAST,
-    EAST: SOUTH,
-    WEST: NORTH,
-}
-
-LOCATION_OFFSET = {
-    NORTH: (-1, 0),
-    SOUTH: (1, 0),
-    EAST: (0, 1),
-    WEST: (0, -1),
-}
-
-
-def next_location(location, dir, width, height):
-    match dir:
-        case 0:
-            if location[0] > 0:
-                return (location[0] - 1, location[1])
-        case 2:
-            if location[0] < height - 1:
-                return (location[0] + 1, location[1])
-        case 3:
-            if location[1] < width - 1:
-                return (location[0], location[1] + 1)
-        case 1:
-            if location[1] > 0:
-                return (location[0], location[1] - 1)
-
-    return None
-
 
 def propagate(start):
     global grid
@@ -65,62 +26,103 @@ def propagate(start):
     beams = deque([start])
 
     while len(beams) > 0:
-        beam = beams.pop()
-        tile = grid[beam[0][0]][beam[0][1]]
+        loc, dir = beams.pop()
+        tile = grid[loc[0]][loc[1]]
 
-        if beam[0] in seen:
-            if beam[1] in seen[beam[0]]:
+        if loc in seen:
+            if dir in seen[loc]:
                 continue
 
-            if tile == '.' and OPPOSITE[beam[1]] in seen[beam[0]]:
+            if tile == '.' and OPPOSITE[dir] in seen[loc]:
                 continue
 
-        seen[beam[0]].add(beam[1])
+        seen[loc].add(dir)
 
-        match tile:
-            case '/':
-                next_dir = MIRROR_F[beam[1]]
-                next = next_location(beam[0], next_dir, width, height)
-                if next is not None:
-                    beams.append((next, next_dir))
-            case '\\':
-                next_dir = MIRROR_B[beam[1]]
-                next = next_location(beam[0], next_dir, width, height)
-                if next is not None:
-                    beams.append((next, next_dir))
-            case '|':
-                if beam[1] == EAST or beam[1] == WEST:
-                    next = next_location(beam[0], NORTH, width, height)
-                    if next is not None:
-                        beams.append((next, NORTH))
+        match dir:
+            case 0:
+                match tile:
+                    case '/':
+                        new_pos = loc[1] + 1
+                        if new_pos < width:
+                            beams.append(((loc[0], new_pos), EAST))
+                    case '\\':
+                        new_pos = loc[1] - 1
+                        if new_pos >= 0:
+                            beams.append(((loc[0], new_pos), WEST))
+                    case '-':
+                        new_pos = loc[1] - 1
+                        if new_pos >= 0:
+                            beams.append(((loc[0], new_pos), WEST))
 
-                    next = next_location(beam[0], SOUTH, width, height)
-                    if next is not None:
-                        beams.append((next, SOUTH))
+                        new_pos = loc[1] + 1
+                        if new_pos < width:
+                            beams.append(((loc[0], new_pos), EAST))
+                    case _:
+                        if loc[0] > 0:
+                            beams.append(((loc[0] - 1, loc[1]), dir))
+            case 2:
+                match tile:
+                    case '/':
+                        new_pos = loc[1] - 1
+                        if new_pos >= 0:
+                            beams.append(((loc[0], new_pos), WEST))
+                    case '\\':
+                        new_pos = loc[1] + 1
+                        if new_pos < width:
+                            beams.append(((loc[0], new_pos), EAST))
+                    case '-':
+                        new_pos = loc[1] - 1
+                        if new_pos >= 0:
+                            beams.append(((loc[0], new_pos), WEST))
 
-                else:
-                    next = next_location(beam[0], beam[1], width, height)
-                    if next is not None:
-                        beams.append((next, beam[1]))
+                        new_pos = loc[1] + 1
+                        if new_pos < width:
+                            beams.append(((loc[0], new_pos), EAST))
+                    case _:
+                        if loc[0] < height - 1:
+                            beams.append(((loc[0] + 1, loc[1]), dir))
+            case 3:
+                match tile:
+                    case '/':
+                        new_pos = loc[0] - 1
+                        if new_pos >= 0:
+                            beams.append(((new_pos, loc[1]), NORTH))
+                    case '\\':
+                        new_pos = loc[0] + 1
+                        if new_pos < height:
+                            beams.append(((new_pos, loc[1]), SOUTH))
+                    case '|':
+                        new_pos = loc[0] - 1
+                        if new_pos >= 0:
+                            beams.append(((new_pos, loc[1]), NORTH))
 
-            case '-':
-                if beam[1] == NORTH or beam[1] == SOUTH:
-                    next = next_location(beam[0], EAST, width, height)
-                    if next is not None:
-                        beams.append((next, EAST))
+                        new_pos = loc[0] + 1
+                        if new_pos < height:
+                            beams.append(((new_pos, loc[1]), SOUTH))
+                    case _:
+                        if loc[1] < width - 1:
+                            beams.append(((loc[0], loc[1] + 1), dir))
+            case 1:
+                match tile:
+                    case '/':
+                        new_pos = loc[0] + 1
+                        if new_pos < height:
+                            beams.append(((new_pos, loc[1]), SOUTH))
+                    case '\\':
+                        new_pos = loc[0] - 1
+                        if new_pos >= 0:
+                            beams.append(((new_pos, loc[1]), NORTH))
+                    case '|':
+                        new_pos = loc[0] - 1
+                        if new_pos >= 0:
+                            beams.append(((new_pos, loc[1]), NORTH))
 
-                    next = next_location(beam[0], WEST, width, height)
-                    if next is not None:
-                        beams.append((next, WEST))
-
-                else:
-                    next = next_location(beam[0], beam[1], width, height)
-                    if next is not None:
-                        beams.append((next, beam[1]))
-            case _:
-                next = next_location(beam[0], beam[1], width, height)
-                if next is not None:
-                    beams.append((next, beam[1]))
+                        new_pos = loc[0] + 1
+                        if new_pos < height:
+                            beams.append(((new_pos, loc[1]), SOUTH))
+                    case _:
+                        if loc[1] > 0:
+                            beams.append(((loc[0], loc[1] - 1), dir))
 
     return len(seen)
 
