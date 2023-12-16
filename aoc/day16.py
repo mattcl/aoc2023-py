@@ -62,13 +62,11 @@ def propagate(grid, start):
                 next = next_location(beam[0], next_dir, width, height)
                 if next is not None:
                     beams.append((next, next_dir))
-                continue
             case '\\':
                 next_dir = MIRROR_B[beam[1]]
                 next = next_location(beam[0], next_dir, width, height)
                 if next is not None:
                     beams.append((next, next_dir))
-                continue
             case '|':
                 if beam[1] == EAST or beam[1] == WEST:
                     next = next_location(beam[0], NORTH, width, height)
@@ -79,7 +77,11 @@ def propagate(grid, start):
                     if next is not None:
                         beams.append((next, SOUTH))
 
-                    continue
+                else:
+                    next = next_location(beam[0], beam[1], width, height)
+                    if next is not None:
+                        beams.append((next, beam[1]))
+
             case '-':
                 if beam[1] == NORTH or beam[1] == SOUTH:
                     next = next_location(beam[0], EAST, width, height)
@@ -90,13 +92,14 @@ def propagate(grid, start):
                     if next is not None:
                         beams.append((next, WEST))
 
-                    continue
+                else:
+                    next = next_location(beam[0], beam[1], width, height)
+                    if next is not None:
+                        beams.append((next, beam[1]))
             case _:
-                pass
-
-        next = next_location(beam[0], beam[1], width, height)
-        if next is not None:
-            beams.append((next, beam[1]))
+                next = next_location(beam[0], beam[1], width, height)
+                if next is not None:
+                    beams.append((next, beam[1]))
 
     return len(energized)
 
@@ -107,6 +110,16 @@ def propagate_all(grid):
     bot = height - 1
     right = width - 1
     starts = []
+    for i in range(0, height):
+        starts.append([
+            grid,
+            ((i, 0), EAST)
+        ])
+        starts.append([
+            grid,
+            ((i, right), WEST)
+        ])
+
     for i in range(0, width):
         starts.append([
             grid,
@@ -117,28 +130,17 @@ def propagate_all(grid):
             ((bot, i), NORTH)
         ])
 
-    for i in range(1, height):
-        starts.append([
-            grid,
-            ((i, 0), EAST)
-        ])
-
-    for i in range(0, height):
-        starts.append([
-            grid,
-            ((i, right), WEST)
-        ])
-
     with Pool() as pool:
-        return max(pool.starmap(propagate, starts))
+        return pool.starmap(propagate, starts)
 
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         grid = input.splitlines()
         start = ((0, 0), EAST)
-        self.p1 = propagate(grid, start)
-        self.p2 = max(self.p1, propagate_all(grid))
+        vals = propagate_all(grid)
+        self.p1 = vals[0]
+        self.p2 = max(vals)
 
     def part_one(self) -> int:
         return self.p1
