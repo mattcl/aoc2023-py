@@ -1,5 +1,6 @@
 """16: PROBLEM NAME"""
 from multiprocessing import Pool
+from collections import deque
 
 import aoc.util
 
@@ -32,12 +33,21 @@ LOCATION_OFFSET = {
 
 
 def next_location(location, dir, width, height):
-    offset = LOCATION_OFFSET[dir]
-    next = (location[0] + offset[0], location[1] + offset[1])
-    if next[0] >= 0 and next[0] < height and next[1] >= 0 and next[1] < width:
-        return next
-    else:
-        return None
+    match dir:
+        case 0:
+            if location[0] > 0:
+                return (location[0] - 1, location[1])
+        case 2:
+            if location[0] < height - 1:
+                return (location[0] + 1, location[1])
+        case 3:
+            if location[1] < width - 1:
+                return (location[0], location[1] + 1)
+        case 1:
+            if location[1] > 0:
+                return (location[0], location[1] - 1)
+
+    return None
 
 
 def propagate(grid, start):
@@ -45,7 +55,7 @@ def propagate(grid, start):
     width = len(grid[0])
     seen = set()
     energized = set()
-    beams = [start]
+    beams = deque([start])
 
     while len(beams) > 0:
         beam = beams.pop()
