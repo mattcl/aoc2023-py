@@ -1,6 +1,6 @@
 """16: PROBLEM NAME"""
 from multiprocessing import Pool
-from collections import deque
+from collections import deque, defaultdict
 
 import aoc.util
 
@@ -9,6 +9,13 @@ NORTH = 0
 WEST = 1
 SOUTH = 2
 EAST = 3
+
+OPPOSITE = {
+    NORTH: SOUTH,
+    SOUTH: NORTH,
+    EAST: WEST,
+    WEST: EAST,
+}
 
 MIRROR_F = {
     NORTH: EAST,
@@ -30,24 +37,6 @@ LOCATION_OFFSET = {
     EAST: (0, 1),
     WEST: (0, -1),
 }
-
-
-def extract_char(bitmap, location, width):
-    target = 1 << (width - 1 - location.col)
-
-    if target & bitmap[location.row][0] != 0:
-        return '/'
-
-    if target & bitmap[location.row][1] != 0:
-        return '\\'
-
-    if target & bitmap[location.row][2] != 0:
-        return '|'
-
-    if target & bitmap[location.row][3] != 0:
-        return '-'
-
-    return None
 
 
 def next_location(location, dir, width, height):
@@ -72,21 +61,22 @@ def propagate(start):
     global grid
     global width
     global height
-    seen = set()
-    energized = set()
+    seen = defaultdict(set)
     beams = deque([start])
 
     while len(beams) > 0:
         beam = beams.pop()
-
-        if beam in seen:
-            continue
-
-        seen.add(beam)
-        energized.add(beam[0])
-
-        # tile = grid.get(beam[0])
         tile = grid[beam[0][0]][beam[0][1]]
+
+        if beam[0] in seen:
+            if beam[1] in seen[beam[0]]:
+                continue
+
+            if tile == '.' and OPPOSITE[beam[1]] in seen[beam[0]]:
+                continue
+
+        seen[beam[0]].add(beam[1])
+
         match tile:
             case '/':
                 next_dir = MIRROR_F[beam[1]]
@@ -132,7 +122,7 @@ def propagate(start):
                 if next is not None:
                     beams.append((next, beam[1]))
 
-    return len(energized)
+    return len(seen)
 
 
 def pool_init(shared_grid):
