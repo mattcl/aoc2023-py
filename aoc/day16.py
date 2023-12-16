@@ -1,0 +1,147 @@
+"""16: PROBLEM NAME"""
+from multiprocessing import Pool
+
+import aoc.util
+
+
+NORTH = 0
+WEST = 1
+SOUTH = 2
+EAST = 3
+
+MIRROR_F = {
+    NORTH: EAST,
+    SOUTH: WEST,
+    EAST: NORTH,
+    WEST: SOUTH,
+}
+
+MIRROR_B = {
+    NORTH: WEST,
+    SOUTH: EAST,
+    EAST: SOUTH,
+    WEST: NORTH,
+}
+
+LOCATION_OFFSET = {
+    NORTH: (-1, 0),
+    SOUTH: (1, 0),
+    EAST: (0, 1),
+    WEST: (0, -1),
+}
+
+
+def next_location(location, dir, width, height):
+    offset = LOCATION_OFFSET[dir]
+    next = (location[0] + offset[0], location[1] + offset[1])
+    if next[0] >= 0 and next[0] < height and next[1] >= 0 and next[1] < width:
+        return next
+    else:
+        return None
+
+
+def propagate(grid, start):
+    height = len(grid)
+    width = len(grid[0])
+    seen = set()
+    energized = set()
+    beams = [start]
+
+    while len(beams) > 0:
+        beam = beams.pop()
+
+        if beam in seen:
+            continue
+
+        seen.add(beam)
+        energized.add(beam[0])
+
+        match grid[beam[0][0]][beam[0][1]]:
+            case '/':
+                next_dir = MIRROR_F[beam[1]]
+                next = next_location(beam[0], next_dir, width, height)
+                if next is not None:
+                    beams.append((next, next_dir))
+                continue
+            case '\\':
+                next_dir = MIRROR_B[beam[1]]
+                next = next_location(beam[0], next_dir, width, height)
+                if next is not None:
+                    beams.append((next, next_dir))
+                continue
+            case '|':
+                if beam[1] == EAST or beam[1] == WEST:
+                    next = next_location(beam[0], NORTH, width, height)
+                    if next is not None:
+                        beams.append((next, NORTH))
+
+                    next = next_location(beam[0], SOUTH, width, height)
+                    if next is not None:
+                        beams.append((next, SOUTH))
+
+                    continue
+            case '-':
+                if beam[1] == NORTH or beam[1] == SOUTH:
+                    next = next_location(beam[0], EAST, width, height)
+                    if next is not None:
+                        beams.append((next, EAST))
+
+                    next = next_location(beam[0], WEST, width, height)
+                    if next is not None:
+                        beams.append((next, WEST))
+
+                    continue
+            case _:
+                pass
+
+        next = next_location(beam[0], beam[1], width, height)
+        if next is not None:
+            beams.append((next, beam[1]))
+
+    return len(energized)
+
+
+def propagate_all(grid):
+    height = len(grid)
+    width = len(grid[0])
+    bot = height - 1
+    right = width - 1
+    starts = []
+    for i in range(0, width):
+        starts.append([
+            grid,
+            ((0, i), SOUTH)
+        ])
+        starts.append([
+            grid,
+            ((bot, i), NORTH)
+        ])
+
+    for i in range(1, height):
+        starts.append([
+            grid,
+            ((i, 0), EAST)
+        ])
+
+    for i in range(0, height):
+        starts.append([
+            grid,
+            ((i, right), WEST)
+        ])
+
+    with Pool() as pool:
+        return max(pool.starmap(propagate, starts))
+
+
+class Solver(aoc.util.Solver):
+    def __init__(self, input: str):
+        grid = input.splitlines()
+        start = ((0, 0), EAST)
+        self.p1 = propagate(grid, start)
+        self.p2 = max(self.p1, propagate_all(grid))
+
+    def part_one(self) -> int:
+        return self.p1
+
+    def part_two(self) -> int:
+        return self.p2
