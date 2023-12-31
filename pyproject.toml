@@ -17,6 +17,7 @@ mattcl-aoc-py-bench = "aoc.bench_cli:run"
 [tool.poetry.dependencies]
 python = "^3.10"
 click = "^8.1.7"
+networkx = "3.2.1"
 numpy = "=1.26.2"
 
 [tool.poetry.dev-dependencies]
