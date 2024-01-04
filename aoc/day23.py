@@ -170,7 +170,7 @@ def explore_to_neighbors_without_slopes(idx, graph, translation, grid):
     return out
 
 
-def longest_distance(graph, starting_depth, pool) -> int:
+def longest_distance(graph, starting_depth, pool, slope) -> int:
     # we know graph[0] exists because it's the start
     second, second_dist = graph[0].neighbors[0]
 
@@ -199,12 +199,23 @@ def longest_distance(graph, starting_depth, pool) -> int:
     # dfs from each starting point
     args = deque()
     for (idx, dist, seen) in starting_points:
-        args.append((idx, dist, end, graph, seen))
+        args.append((idx, dist, end, seen))
 
-    return max(pool.starmap(dfs, args))
+    if slope:
+        return max(pool.starmap(dfs_slope, args))
+    else:
+        return max(pool.starmap(dfs, args))
 
 
-def dfs(start, cur_cost, goal, graph, seen) -> int:
+def dfs_slope(start, cur_cost, goal, seen) -> int:
+    global sloped
+    longest = [0]
+    longest_recur(start, cur_cost, goal, sloped, seen, longest)
+    return longest[0]
+
+
+def dfs(start, cur_cost, goal, seen) -> int:
+    global graph
     longest = [0]
     longest_recur(start, cur_cost, goal, graph, seen, longest)
     return longest[0]
@@ -221,6 +232,14 @@ def longest_recur(start, cur_cost, goal, graph, seen, longest):
     for (next_idx, dist) in graph[start].neighbors:
         if (1 << next_idx) & next_seen == 0:
             longest_recur(next_idx, cur_cost + dist, goal, graph, next_seen, longest)
+
+
+def pool_init(s, g):
+    global sloped
+    global graph
+
+    sloped = s
+    graph = g
 
 
 class Solver(aoc.util.Solver):
@@ -243,9 +262,9 @@ class Solver(aoc.util.Solver):
         else:
             depth = 5
 
-        with Pool() as pool:
-            self.p1 = longest_distance(slope_graph, depth, pool)
-            self.p2 = longest_distance(graph, depth, pool)
+        with Pool(initializer=pool_init, initargs=[slope_graph, graph]) as pool:
+            self.p1 = longest_distance(slope_graph, depth, pool, True)
+            self.p2 = longest_distance(graph, depth, pool, False)
 
     def part_one(self) -> int:
         return self.p1
