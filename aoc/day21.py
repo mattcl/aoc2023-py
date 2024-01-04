@@ -1,4 +1,6 @@
 """21: step counter"""
+from collections import deque
+
 import aoc.util
 
 
@@ -18,81 +20,52 @@ class Solver(aoc.util.Solver):
         self.height = len(self.grid)
 
     def part_one(self) -> int:
+        steps = 64
+        parity = steps % 2 == 0
         start = (65, 65)
-        seen_odd = set()
-        seen_even = set()
-        cur = set()
-        cur.add(start)
+        seen = set()
+        cur = deque()
+        cur.append(start)
+        seen.add(start)
 
-        for step in range(64):
-            next = set()
+        count = 1 if parity else 0
+
+        for step in range(1, steps + 1):
+            next = deque()
             for loc in cur:
-                if step % 2 == 0:
-                    if loc in seen_even:
-                        continue
-
-                    seen_even.add(loc)
-
-                else:
-                    if loc in seen_odd:
-                        continue
-
-                    seen_odd.add(loc)
-
                 for dr, dc in NEIGHBORS:
                     next_loc = (loc[0] + dr, loc[1] + dc)
                     if self.grid[next_loc[0]][next_loc[1]] == '#':
                         continue
 
-                    if step % 2 == 0:
-                        if next_loc in seen_odd:
-                            continue
-                    else:
-                        if next_loc in seen_even:
-                            continue
+                    if next_loc not in seen:
+                        seen.add(next_loc)
+                        if (step % 2 == 0) == parity:
+                            count += 1
 
-                    next.add(next_loc)
+                        next.append(next_loc)
 
             cur = next
 
-        return len(cur) + len(seen_even)
+        return count
 
     def part_two(self) -> int:
         steps = 26501365
+        parity = steps % 2 == 0
         start = (65, 65)
-        seen_odd = set()
-        seen_even = set()
-        cur = set()
-        cur.add(start)
+        seen = set()
+        cur = deque()
+        cur.append(start)
+        seen.add(start)
 
+        odd_count = 1 if parity else 0
+        even_count = 0 if parity else 1
         counts = []
         remainder = steps % self.height
 
-        for step in range(steps):
-            if step % self.height == remainder:
-                if step % 2 == 0:
-                    prev = len(seen_even)
-                else:
-                    prev = len(seen_odd)
-                counts.append(len(cur) + prev)
-
-                if len(counts) == 3:
-                    break
-
-            next = set()
+        for step in range(1, steps):
+            next = deque()
             for loc in cur:
-                if step % 2 == 0:
-                    if loc in seen_even:
-                        continue
-
-                    seen_even.add(loc)
-
-                else:
-                    if loc in seen_odd:
-                        continue
-
-                    seen_odd.add(loc)
-
                 for dr, dc in NEIGHBORS:
                     next_loc = (loc[0] + dr, loc[1] + dc)
                     row = next_loc[0] % self.height
@@ -101,14 +74,23 @@ class Solver(aoc.util.Solver):
                     if self.grid[row][col] == '#':
                         continue
 
-                    if step % 2 == 0:
-                        if next_loc in seen_odd:
-                            continue
-                    else:
-                        if next_loc in seen_even:
-                            continue
+                    if next_loc not in seen:
+                        seen.add(next_loc)
+                        if (step % 2 == 0) == parity:
+                            odd_count += 1
+                        else:
+                            even_count += 1
 
-                    next.add(next_loc)
+                        next.append(next_loc)
+
+            if step % self.height == remainder:
+                if step % 2 == 1:
+                    counts.append(odd_count)
+                else:
+                    counts.append(even_count)
+
+                if len(counts) == 3:
+                    break
 
             cur = next
 
