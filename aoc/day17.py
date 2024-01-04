@@ -1,14 +1,8 @@
 """17: PROBLEM NAME"""
 from collections import defaultdict
-from heapq import heappop, heappush
 
 import aoc.util
 
-
-NORTH = 0
-SOUTH = 1
-EAST = 2
-WEST = 3
 
 HORIZONTAL = 0
 VERTICAL = 1
@@ -107,6 +101,40 @@ def neighbors(grid, width, height, minimum, maximum, start):
         return out
 
 
+class BucketQueue:
+    def __init__(self):
+        self.buckets = [[] for _ in range(1000)]
+        self.first = None
+
+    def push(self, cost, value):
+        if len(self.buckets) <= cost:
+            for _ in range(cost - len(self.buckets) + 1):
+                self.buckets.append(list())
+
+        self.buckets[cost].append(value)
+
+        if self.first is None or self.first > cost:
+            self.first = cost
+
+    def pop(self):
+        if self.first is None:
+            return None
+
+        cost = self.first
+
+        v = self.buckets[self.first].pop()
+
+        if len(self.buckets[self.first]) == 0:
+            start = self.first + 1
+            self.first = None
+            for i in range(start, len(self.buckets)):
+                if len(self.buckets[i]) > 0:
+                    self.first = i
+                    break
+
+        return cost, v
+
+
 def dijkstra(grid, minimum, maximum):
     height = len(grid)
     width = len(grid[0])
@@ -122,21 +150,25 @@ def dijkstra(grid, minimum, maximum):
 
     # ndoes in the heap are
     # (row, col, orientation)
-    heap = []
+    heap = BucketQueue()
 
     # we're just going to push all the possible starts on the heap to deal with
     # the special first square
     for neighbor_cost, neighbor in neighbors(grid, width, height, minimum, maximum, start_horiz):
         costs[neighbor] = neighbor_cost
-        heappush(heap, (neighbor_cost, neighbor))
+        heap.push(neighbor_cost, neighbor)
 
     for neighbor_cost, neighbor in neighbors(grid, width, height, minimum, maximum, start_vert):
         costs[neighbor] = neighbor_cost
-        heappush(heap, (neighbor_cost, neighbor))
+        heap.push(neighbor_cost, neighbor)
 
     # now find the path
-    while len(heap) > 0:
-        (cur_cost, node) = heappop(heap)
+    while True:
+        res = heap.pop()
+        if res is None:
+            break
+
+        cur_cost, node = res
 
         if node[0] == end[0] and node[1] == end[1]:
             return cur_cost
@@ -149,7 +181,7 @@ def dijkstra(grid, minimum, maximum):
 
             if next_cost < costs[neighbor]:
                 costs[neighbor] = next_cost
-                heappush(heap, (next_cost, neighbor))
+                heap.push(next_cost, neighbor)
 
 
 class Solver(aoc.util.Solver):
