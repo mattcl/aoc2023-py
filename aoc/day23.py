@@ -1,6 +1,6 @@
 """23: PROBLEM NAME"""
 from collections import deque
-from copy import deepcopy
+from copy import copy, deepcopy
 from multiprocessing import Pool
 
 import aoc.util
@@ -49,6 +49,7 @@ class Node:
         self.idx = idx
         self.location = location
         self.neighbors = []
+        self.layer = 0
 
 
 def make_base_graph(grid):
@@ -170,7 +171,44 @@ def explore_to_neighbors_without_slopes(idx, graph, translation, grid):
     return out
 
 
-def longest_distance(graph, starting_depth, pool, slope) -> int:
+def make_layer_set(end, graph):
+    layer_set = []
+
+    for i in range(len(graph)):
+        d = dist_to_end(i, end, graph)
+        graph[i].layer = d
+        if d >= len(layer_set):
+            rem = d - len(layer_set) + 1
+            for _ in range(rem):
+                layer_set.append(0)
+
+        layer_set[d] += 1
+
+    return layer_set
+
+
+def dist_to_end(start, end, graph):
+    seen = 0
+    cur = [(start, 0)]
+
+    while len(cur) > 0:
+        next = []
+        for (idx, dist) in cur:
+            if idx == end:
+                return dist
+
+            seen |= 1 << idx
+
+            for (n, _) in graph[idx].neighbors:
+                if 1 << n & seen == 0:
+                    next.append((n, dist + 1))
+
+        cur = next
+
+    return -1
+
+
+def longest_distance(graph, starting_depth, pool, layer_set, slope) -> int:
     # we know graph[0] exists because it's the start
     second, second_dist = graph[0].neighbors[0]
 
@@ -183,23 +221,25 @@ def longest_distance(graph, starting_depth, pool, slope) -> int:
         initial_seen = 3 | (1 << second)
 
     starting_points = deque()
-    starting_points.append((second, second_dist + end_dist, initial_seen))
+    starting_points.append((second, second_dist + end_dist, initial_seen, layer_set))
 
     # bfs to the starting_depth
     for _ in range(2, starting_depth):
         next = deque()
-        for (idx, dist, seen) in starting_points:
+        for (idx, dist, seen, ls) in starting_points:
+            next_ls = ls.copy()
+            next_ls[graph[idx].layer] -= 1
             for (fidx, fdist) in graph[idx].neighbors:
                 mask = 1 << fidx
                 if mask & seen == 0:
-                    next.append((fidx, dist + fdist, seen | mask))
+                    next.append((fidx, dist + fdist, seen | mask, next_ls.copy()))
 
         starting_points = next
 
     # dfs from each starting point
     args = deque()
-    for (idx, dist, seen) in starting_points:
-        args.append((idx, dist, end, seen))
+    for (idx, dist, seen, ls) in starting_points:
+        args.append((idx, dist, end, seen, ls))
 
     if slope:
         return max(pool.starmap(dfs_slope, args))
@@ -207,31 +247,38 @@ def longest_distance(graph, starting_depth, pool, slope) -> int:
         return max(pool.starmap(dfs, args))
 
 
-def dfs_slope(start, cur_cost, goal, seen) -> int:
+def dfs_slope(start, cur_cost, goal, seen, ls) -> int:
     global sloped
     longest = [0]
-    longest_recur(start, cur_cost, goal, sloped, seen, longest)
+    longest_recur(start, cur_cost, goal, sloped, ls, seen, longest)
     return longest[0]
 
 
-def dfs(start, cur_cost, goal, seen) -> int:
+def dfs(start, cur_cost, goal, seen, ls) -> int:
     global graph
     longest = [0]
-    longest_recur(start, cur_cost, goal, graph, seen, longest)
+    longest_recur(start, cur_cost, goal, graph, ls, seen, longest)
     return longest[0]
 
 
-def longest_recur(start, cur_cost, goal, graph, seen, longest):
+def longest_recur(start, cur_cost, goal, graph, ls, seen, longest):
     if start == goal:
         longest[0] = max(longest[0], cur_cost)
         return
+
+    layer = graph[start].layer
+    ls[layer] -= 1
+    can_move_away_from_end = ls[layer] > 0
 
     mask = 1 << start
     next_seen = seen | mask
 
     for (next_idx, dist) in graph[start].neighbors:
+        if not can_move_away_from_end and graph[next_idx].layer > layer:
+            continue
+
         if (1 << next_idx) & next_seen == 0:
-            longest_recur(next_idx, cur_cost + dist, goal, graph, next_seen, longest)
+            longest_recur(next_idx, cur_cost + dist, goal, graph, ls.copy(), next_seen, longest)
 
 
 def pool_init(s, g):
@@ -252,7 +299,10 @@ class Solver(aoc.util.Solver):
         graph = deepcopy(slope_graph)
 
         populate_graph_with_slopes(slope_graph, grid)
+        slope_ls = make_layer_set(1, slope_graph)
+
         populate_graph_without_slopes(graph, grid)
+        ls = make_layer_set(1, graph)
 
         # this is hacky, but we don't have more than depth 5 to work with for
         # the example input
@@ -263,8 +313,8 @@ class Solver(aoc.util.Solver):
             depth = 5
 
         with Pool(initializer=pool_init, initargs=[slope_graph, graph]) as pool:
-            self.p1 = longest_distance(slope_graph, depth, pool, True)
-            self.p2 = longest_distance(graph, depth, pool, False)
+            self.p1 = longest_distance(slope_graph, depth, pool, slope_ls, True)
+            self.p2 = longest_distance(graph, depth, pool, ls, False)
 
     def part_one(self) -> int:
         return self.p1
