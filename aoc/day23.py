@@ -176,6 +176,7 @@ def make_layer_set(end, graph):
 
     for i in range(len(graph)):
         d = dist_to_end(i, end, graph)
+
         graph[i].layer = d
         if d >= len(layer_set):
             rem = d - len(layer_set) + 1
@@ -220,6 +221,7 @@ def longest_distance(graph, starting_depth, pool, layer_set, slope) -> int:
         end, end_dist = graph[1].neighbors[0]
         initial_seen = 3 | (1 << second)
 
+    layer_set[graph[0].layer] -= 1
     starting_points = deque()
     starting_points.append((second, second_dist + end_dist, initial_seen, layer_set))
 
@@ -250,7 +252,7 @@ def longest_distance(graph, starting_depth, pool, layer_set, slope) -> int:
 def dfs_slope(start, cur_cost, goal, seen, ls) -> int:
     global sloped
     longest = [0]
-    longest_recur(start, cur_cost, goal, sloped, ls, seen, longest)
+    longest_recur_slope(start, cur_cost, goal, sloped, ls, seen, longest)
     return longest[0]
 
 
@@ -261,6 +263,26 @@ def dfs(start, cur_cost, goal, seen, ls) -> int:
     return longest[0]
 
 
+def longest_recur_slope(start, cur_cost, goal, graph, ls, seen, longest):
+    if start == goal:
+        longest[0] = max(longest[0], cur_cost)
+        return
+
+    layer = graph[start].layer
+    ls[layer] -= 1
+    can_move_away_from_end = ls[layer] > 0
+
+    mask = 1 << start
+    next_seen = seen | mask
+
+    for (next_idx, dist) in graph[start].neighbors:
+        if not can_move_away_from_end and graph[next_idx].layer > layer:
+            continue
+
+        if (1 << next_idx) & next_seen == 0:
+            longest_recur_slope(next_idx, cur_cost + dist, goal, graph, ls.copy(), next_seen, longest)
+
+
 def longest_recur(start, cur_cost, goal, graph, ls, seen, longest):
     if start == goal:
         longest[0] = max(longest[0], cur_cost)
@@ -269,6 +291,12 @@ def longest_recur(start, cur_cost, goal, graph, ls, seen, longest):
     layer = graph[start].layer
     ls[layer] -= 1
     can_move_away_from_end = ls[layer] > 0
+
+    # bail if we _could_ have visited a node above us
+    if not can_move_away_from_end and len(graph) > 30:
+        for i in range(layer, len(ls)):
+            if ls[i] > 0:
+                return
 
     mask = 1 << start
     next_seen = seen | mask
