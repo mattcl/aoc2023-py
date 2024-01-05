@@ -108,27 +108,25 @@ def process(spring):
 
 
 def process_long(spring):
+    txt = "?".join([spring[0]] * 5)
+    long_nums = spring[1] * 5
     seen = {}
-    return arrangements(spring[0], spring[1], seen)
+    return arrangements(txt, long_nums, seen)
 
 
 class Solver(aoc.util.Solver):
     def __init__(self, input: str):
         springs = []
-        long_springs = []
         for line in input.splitlines():
             parts = line.split()
             text = parts[0]
             nums = list(map(int, parts[1].split(",")))
-            long_text = "?".join([text] * 5)
-            long_nums = nums * 5
             springs.append([text, nums])
-            long_springs.append([long_text, long_nums])
 
         # do this here so we can make sure we terminate the pool
         with Pool() as pool:
             self.p1 = sum(pool.map(process, springs))
-            self.p2 = sum(pool.map(process_long, long_springs))
+            self.p2 = sum(pool.map(process_long, springs))
 
     def part_one(self) -> int:
         return self.p1
