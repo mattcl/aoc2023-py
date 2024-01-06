@@ -67,6 +67,7 @@ def inputs():
     return out
 
 
+@pytest.mark.combined
 @pytest.mark.bench
 def test_combined_runtime(benchmark, inputs):
     benchmark(all_days, inputs)
