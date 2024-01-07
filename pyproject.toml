@@ -37,7 +37,8 @@ line-length = 120
 markers = [
     "real: marks tests as running against the real input (deselect with '-m \"not real\"')",
     "example: marks tests as running against the example input (deselect with '-m \"not example\"')",
-    "bench: marks tests as benchmarking (deselect with '-m \"not bench\"')"
+    "bench: marks tests as benchmarking (deselect with '-m \"not bench\"')",
+    "combined: marks that this test is the combined benchmark"
 ]
 testpaths = [
     "tests"
