@@ -292,12 +292,17 @@ def longest_recur(start, cur_cost, goal, graph, ls, seen, longest):
     ls[layer] -= 1
     can_move_away_from_end = ls[layer] > 0
 
-    # Edit: this is an invalid assumption on all inputs
-    # bail if we _could_ have visited a node above us
-    # if not can_move_away_from_end and len(graph) > 30:
-    #     for i in range(layer, len(ls)):
-    #         if ls[i] > 0:
-    #             return
+    # The original assumption that we need to visit all nodes to have the longest
+    # path is not valid for all inputs. So far, the encountered inputs require
+    # visiting all but one
+    if not can_move_away_from_end and len(graph) > 30:
+        num_above = 0
+        for i in range(layer, len(ls)):
+            if ls[i] > 0:
+                num_above += ls[i]
+
+            if num_above > 1:
+                return
 
     mask = 1 << start
     next_seen = seen | mask
