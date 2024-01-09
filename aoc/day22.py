@@ -25,15 +25,17 @@ def search(start) -> int:
     generation = deque()
     generation.append(start)
     removed = set()
+    removed.add(start)
 
     while len(generation) > 0:
         next = deque()
         for i in generation:
-            removed.add(i)
-
-        for i in generation:
             for n in above[i]:
+                if n in removed:
+                    continue
+
                 if all(b in removed for b in below[n]):
+                    removed.add(n)
                     next.append(n)
 
         generation = next
