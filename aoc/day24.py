@@ -112,4 +112,4 @@ class Solver(aoc.util.Solver):
         # res = np.linalg.solve(mat, rhs)
         res = mat.LUsolve(rhs)
 
-        return round(res[0, 0]) + round(res[1, 0]) + round(res[2, 0])
+        return int(round(res[0, 0])) + int(round(res[1, 0])) + int(round(res[2, 0]))
