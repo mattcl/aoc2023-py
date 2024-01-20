@@ -86,63 +86,95 @@ class Solver(aoc.util.Solver):
                     case 0:
                         match cur_rule.key:
                             case 'x':
-                                adjusted = cur_rule.value + 1
-                                if adjusted >= x[0] and adjusted <= x[1]:
-                                    intervals.append(((adjusted, x[1]), m, a, s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= x[0] and cur_rule.value <= x[1]:
+                                if x[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                elif x[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                else:
+                                    # split the range
                                     intervals.append(((x[0], cur_rule.value), m, a, s, wf, rule_idx + 1))
+                                    intervals.append(((cur_rule.value + 1, x[1]), m, a, s, cur_rule.workflow, 0))
                             case 'm':
-                                adjusted = cur_rule.value + 1
-                                if adjusted >= m[0] and adjusted <= m[1]:
-                                    intervals.append((x, (adjusted, m[1]), a, s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= m[0] and cur_rule.value <= m[1]:
+                                if m[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                elif m[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                else:
+                                    # split the range
                                     intervals.append((x, (m[0], cur_rule.value), a, s, wf, rule_idx + 1))
+                                    intervals.append((x, (cur_rule.value + 1, m[1]), a, s, cur_rule.workflow, 0))
                             case 'a':
-                                adjusted = cur_rule.value + 1
-                                if adjusted >= a[0] and adjusted <= a[1]:
-                                    intervals.append((x, m, (adjusted, a[1]), s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= a[0] and cur_rule.value <= a[1]:
+                                if a[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                elif a[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                else:
+                                    # split the range
                                     intervals.append((x, m, (a[0], cur_rule.value), s, wf, rule_idx + 1))
+                                    intervals.append((x, m, (cur_rule.value + 1, a[1]), s, cur_rule.workflow, 0))
                             case 's':
-                                adjusted = cur_rule.value + 1
-                                if adjusted >= s[0] and adjusted <= s[1]:
-                                    intervals.append((x, m, a, (adjusted, s[1]), cur_rule.workflow, 0))
-
-                                if cur_rule.value >= s[0] and cur_rule.value <= s[1]:
+                                if s[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                elif s[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                else:
+                                    # split the range
                                     intervals.append((x, m, a, (s[0], cur_rule.value), wf, rule_idx + 1))
+                                    intervals.append((x, m, a, (cur_rule.value + 1, s[1]), cur_rule.workflow, 0))
                     # less
                     case 1:
                         match cur_rule.key:
                             case 'x':
-                                adjusted = cur_rule.value - 1
-                                if adjusted >= x[0] and adjusted <= x[1]:
-                                    intervals.append(((x[0], adjusted), m, a, s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= x[0] and cur_rule.value <= x[1]:
+                                if x[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                elif x[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                else:
+                                    # split the range
+                                    intervals.append(((x[0], cur_rule.value - 1), m, a, s, cur_rule.workflow, 0))
                                     intervals.append(((cur_rule.value, x[1]), m, a, s, wf, rule_idx + 1))
                             case 'm':
-                                adjusted = cur_rule.value - 1
-                                if adjusted >= m[0] and adjusted <= m[1]:
-                                    intervals.append((x, (m[0], adjusted), a, s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= m[0] and cur_rule.value <= m[1]:
+                                if m[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                elif m[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                else:
+                                    # split the range
+                                    intervals.append((x, (m[0], cur_rule.value - 1), a, s, cur_rule.workflow, 0))
                                     intervals.append((x, (cur_rule.value, m[1]), a, s, wf, rule_idx + 1))
                             case 'a':
-                                adjusted = cur_rule.value - 1
-                                if adjusted >= a[0] and adjusted <= a[1]:
-                                    intervals.append((x, m, (a[0], adjusted), s, cur_rule.workflow, 0))
-
-                                if cur_rule.value >= a[0] and cur_rule.value <= a[1]:
+                                if a[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                elif a[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                else:
+                                    # split the range
+                                    intervals.append((x, m, (a[0], cur_rule.value - 1), s, cur_rule.workflow, 0))
                                     intervals.append((x, m, (cur_rule.value, a[1]), s, wf, rule_idx + 1))
                             case 's':
-                                adjusted = cur_rule.value - 1
-                                if adjusted >= s[0] and adjusted <= s[1]:
-                                    intervals.append((x, m, a, (s[0], adjusted), cur_rule.workflow, 0))
-
-                                if cur_rule.value >= s[0] and cur_rule.value <= s[1]:
+                                if s[1] < cur_rule.value:
+                                    # entirely to the left
+                                    intervals.append((x, m, a, s, cur_rule.workflow, 0))
+                                elif s[0] > cur_rule.value:
+                                    # entirely to the right
+                                    intervals.append((x, m, a, s, wf, rule_idx + 1))
+                                else:
+                                    # split the range
+                                    intervals.append((x, m, a, (s[0], cur_rule.value - 1), cur_rule.workflow, 0))
                                     intervals.append((x, m, a, (cur_rule.value, s[1]), wf, rule_idx + 1))
                     case 2:
                         intervals.append((x, m, a, s, cur_rule.workflow, 0))
@@ -164,4 +196,3 @@ class Solver(aoc.util.Solver):
                 part[p[0]] = int(p[2:])
 
             self.parts.append(part)
-
